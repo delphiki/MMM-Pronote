@@ -1,0 +1,26 @@
+{
+  "name": "MMM-Pronote",
+  "version": "1.0.0",
+  "description": "",
+  "main": "MMM-Pronote.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delphiki/MMM-Pronote.git"
+  },
+  "keywords": [
+    "magicmirror",
+    "pronote"
+  ],
+  "author": "Julien \"delphiki\" Villetorte",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/delphiki/MMM-Pronote/issues"
+  },
+  "homepage": "https://github.com/delphiki/MMM-Pronote#readme",
+  "dependencies": {
+    "pronote-api": "^2.1.3"
+  }
+}

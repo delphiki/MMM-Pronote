@@ -1,0 +1,19 @@
+.pronote-timetable {
+  font-size: 0.6em;
+}
+.pronote-timetable tr {
+  line-height: 0.8em;
+  vertical-align: middle;
+}
+.pronote-class-schedule {
+  padding-right: 1em;
+}
+.pronote-class-subject {
+  text-align: left;
+  color: white;
+}
+.pronote-class-cancelled {
+  text-decoration: line-through;
+  color: #aaaaaa;
+}
+
