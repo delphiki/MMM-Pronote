@@ -1,11 +1,8 @@
 {
   "name": "MMM-Pronote",
   "version": "1.0.0",
-  "description": "",
+  "description": "Display Pronote on MagicMirror",
   "main": "MMM-Pronote.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/delphiki/MMM-Pronote.git"
@@ -14,7 +11,10 @@
     "magicmirror",
     "pronote"
   ],
-  "author": "Julien \"delphiki\" Villetorte",
+  "author": [
+    "Julien \"delphiki\" Villetorte",
+    "bugsounet"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/delphiki/MMM-Pronote/issues"
