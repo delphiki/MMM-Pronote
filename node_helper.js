@@ -1,19 +1,14 @@
 const pronote = require('pronote-api');
 
 let NodeHelper = require("node_helper");
+let session = null;
 module.exports = NodeHelper.create({
 	initialize: async function(config) {
 		this.config = config;
-		const session = await this.login();
-		this.sendSocketNotification("PRONOTE_USER", session.user);
-		const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(session);
-		const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays);
-		const timetable = await this.getTimetable(session, timetableDay);
-		this.sendSocketNotification("PRONOTE_TIMETABLE", {
-			timetable: timetable,
-			timetableDay: timetableDay
-		});
+		session = await this.login();
+		session.setKeepAlive(true);
 
+		await this.fetchData();
 	},
 	login: async function() {
 		try {
@@ -32,7 +27,17 @@ module.exports = NodeHelper.create({
 			}
 		}
 	},
-	getTimetable: async (session, date = null) => {
+	fetchData: async function() {
+		this.sendSocketNotification("PRONOTE_USER", session.user);
+		const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(session);
+		const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays);
+		const timetable = await this.getTimetable(session, timetableDay);
+		this.sendSocketNotification("PRONOTE_TIMETABLE", {
+			timetable: timetable,
+			timetableDay: timetableDay
+		});
+	},
+	getTimetable: async function(session, date = null) {
 		return await session.timetable(date);
 	},
 	getDayOfYear: function() {
@@ -61,6 +66,9 @@ module.exports = NodeHelper.create({
 		switch(notification) {
 			case 'SET_CONFIG':
 				this.initialize(payload);
+				break;
+			case 'UPDATE_DATA':
+				this.fetchData();
 				break;
 		}
 	},
