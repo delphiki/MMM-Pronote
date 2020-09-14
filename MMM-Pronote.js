@@ -9,6 +9,7 @@
 
 Module.register("MMM-Pronote", {
   defaults: {
+    debug: true, // set it to false if you want no debug in console
     url: null,
     username: null,
     password: null,
@@ -23,6 +24,8 @@ Module.register("MMM-Pronote", {
 
   start: function() {
    this.config = configMerge({}, this.defaults, this.config)
+   if (this.config.debug) this.log = (...args) => { console.log("[PRONOTE]", ...args) }
+   else this.log = (...args) => { /* do nothing */ }
   },
 
   getScripts: function() {
@@ -41,17 +44,23 @@ Module.register("MMM-Pronote", {
     return this.config
   },
 
-  updateTimetable: function(data) {
-    Log.info(data)
-    Log.info(typeof data.timetableDay)
+  updateData: function(data) {
+    this.config.user = data.name
+    this.log("data:", data)
+    this.log("typeof", typeof data.timetable.timetableDay)
+    this.log("user", this.config.user)
 
     Array.from(data.timetable, (course) => {
       course.localizedFrom = (new Date(course.from)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
       course.localizedTo = (new Date(course.to)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
     })
-    this.config.timetable = data.timetable
-    this.config.timetableDay = new Date(data.timetableDay)
+    this.config.timetable = data.timetable.timetable
+    this.config.timetableDay = new Date(data.timetable.timetableDay)
     this.config.localizedTimetableDay = this.config.timetableDay.toLocaleDateString(navigator.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    this.log("localized:", this.config.localizedTimetableDay)
+    this.log("timetable @bugsounet:", data.timetableOfTheDay)
+    this.log("timetable @ju:", data.timetable)
+    this.log("marks:", data.marks)
   },
 
   notificationReceived: function(notification, payload, sender) {
@@ -64,11 +73,8 @@ Module.register("MMM-Pronote", {
 
   socketNotificationReceived: function(notification, payload) {
     switch (notification) {
-      case "PRONOTE_USER":
-        this.config.user = payload
-        break
-      case "PRONOTE_TIMETABLE":
-        this.updateTimetable(payload)
+      case "PRONOTE_UPDATED":
+        this.updateData(payload)
         break
     }
     this.updateDom()  // <-- not really a good solution, we will do it in real time don't worry :)

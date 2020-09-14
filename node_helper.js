@@ -1,16 +1,19 @@
 const pronote = require('pronote-api');
 
 let NodeHelper = require("node_helper");
+let log = (...args) => { /* do nothing */ }
 
 module.exports = NodeHelper.create({
    start: function() {
     /** initialize all value there **/
     this.session = null
+    this.data = {}
   },
 
   initialize: async function(config) {
     console.log("[PRONOTE] MMM-Pronote Version:", require('./package.json').version)
     this.config = config
+    if (this.config.debug) log = (...args) => { console.log("[PRONOTE]", ...args) }
     this.interval = null
     this.updateIntervalMilliseconds = this.getUpdateIntervalMillisecondFromString(this.config.updateInterval)
 
@@ -18,7 +21,6 @@ module.exports = NodeHelper.create({
     this.session.setKeepAlive(true)
 
     await this.fetchData()
-    this.scheduleUpdate()
     console.log("[PRONOTE] Pronote is initialized.")
   },
 
@@ -42,14 +44,35 @@ module.exports = NodeHelper.create({
   },
 
   fetchData: async function() {
-    this.sendSocketNotification("PRONOTE_USER", this.session.user)
+    /** crazy mode ! send ALL data ! **/
+    this.data = this.session.user
     const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
-    const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)// ? pourquoi le jour d'apres ?
+
+    const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
     const timetable = await this.getTimetable(this.session, timetableDay)
-    this.sendSocketNotification("PRONOTE_TIMETABLE", {
-      timetable: timetable,
-      timetableDay: timetableDay
-    })
+
+    const timetableOfTheDay = await this.session.timetable()
+    const marks = await this.session.marks()
+    const contents = await this.session.contents()
+    const evaluations = await this.session.evaluations()
+    const absences = await this.session.absences()
+    const infos = await this.session.infos()
+    const menu = await this.session.menu()
+
+    this.data["timetableOfTheDay"] = timetableOfTheDay // test de recup emploi du temps du jour (@bugsounet version)
+    this.data["timetable"] = { timetable: timetable, timetableDay: timetableDay } // ta version pour comparer
+    this.data["marks"] = marks // notes de l'eleve
+    this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
+    this.data["evaluations"] = evaluations // les resulat des evals
+    this.data["absences"] = absences // les absences ..
+    this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
+    this.data["menu"] = menu // le menu de la cantine
+
+    /** send all datas ... **/
+    this.sendSocketNotification("PRONOTE_UPDATED", this.data)
+    log("Data:", this.data)
+    /** Ok ! All info are sended auto-update it ! **/
+    this.scheduleUpdate()
   },
 
   getTimetable: async function(session, date = null) {
@@ -94,9 +117,10 @@ module.exports = NodeHelper.create({
    if (typeof delay !== "undefined" && delay >= 0) {
      nextLoad = delay
    }
-  clearInterval(this.interval)
-  this.interval = setInterval(() => {
+   clearInterval(this.interval)
+   this.interval = setInterval(() => {
      this.fetchData()
+     log("Pronote datas are updated.")
    }, nextLoad)
   },
 
