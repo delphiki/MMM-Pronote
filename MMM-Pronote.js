@@ -51,7 +51,7 @@ Module.register("MMM-Pronote", {
     this.log("typeof", typeof data.timetable.timetableDay)
     this.log("user", this.config.user)
 
-    Array.from(data.timetable, (course) => {
+    Array.from(data.timetable.timetable, (course) => {
       course.localizedFrom = (new Date(course.from)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
       course.localizedTo = (new Date(course.to)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
     })
