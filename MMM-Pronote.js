@@ -3,6 +3,7 @@
  * Module: MMM-Pronote
  *
  * By Julien "delphiki" Villetorte
+ * and @bugsounet
  * MIT Licensed.
  */
 

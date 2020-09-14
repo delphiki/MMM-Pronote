@@ -44,10 +44,15 @@ module.exports = NodeHelper.create({
   },
 
   fetchData: async function() {
-    /** crazy mode ! send ALL data ! **/
-    this.data = this.session.user
-    const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
+    /** create or update data object **/
+    this.data["name"] = this.session.user.name
+    this.data["class"] = this.session.user.studentClass.name
+    this.data["establishmentsInfo"] = this.session.user.establishmentsInfo
+    this.data["holidays"] = this.session.params.publicHolidays
+    //this.data["USER"] = this.session.user
+    //this.data["PARAMS"] = this.session.params
 
+    const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
     const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
     const timetable = await this.getTimetable(this.session, timetableDay)
 
@@ -58,6 +63,7 @@ module.exports = NodeHelper.create({
     const absences = await this.session.absences()
     const infos = await this.session.infos()
     const menu = await this.session.menu()
+    const homeworks= await this.session.homeworks() // ? new api ?
 
     this.data["timetableOfTheDay"] = timetableOfTheDay // test de recup emploi du temps du jour (@bugsounet version)
     this.data["timetable"] = { timetable: timetable, timetableDay: timetableDay } // ta version pour comparer
@@ -67,10 +73,12 @@ module.exports = NodeHelper.create({
     this.data["absences"] = absences // les absences ..
     this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
     this.data["menu"] = menu // le menu de la cantine
+    this.data["homeworks"] = homeworks // liste des devoirs à faire
 
     /** send all datas ... **/
     this.sendSocketNotification("PRONOTE_UPDATED", this.data)
-    log("Data:", this.data)
+    //log("Data:", homeworks) // log as you want ;)
+
     /** Ok ! All info are sended auto-update it ! **/
     this.scheduleUpdate()
   },
