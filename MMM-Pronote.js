@@ -68,6 +68,7 @@ Module.register("MMM-Pronote", {
 
       var user = document.createElement("div")
       user.id = "PRONOTE_USER"
+      //user.textContent = "@bugsounet (6e2)" // for screenshot :)))
       user.textContent = this.userData.name + " (" + this.userData.class + ")"
       wrapper.appendChild(user)
 
@@ -86,6 +87,7 @@ Module.register("MMM-Pronote", {
         day.appendChild(dayText)
 
         this.userData.timetableOfTheDay.forEach(table => {
+          if (table.hasDuplicate && table.isCancelled) return
           var Table = document.createElement("div")
           Table.id = "PRONOTE_DISPLAY_TIMETABLE"
           var Hour = document.createElement("div")
@@ -116,6 +118,7 @@ Module.register("MMM-Pronote", {
         next.appendChild(nextText)
 
         this.userData.timetableOfNextDay.timetable.forEach(table => {
+          if (table.hasDuplicate && table.isCancelled) return
           var Table = document.createElement("div")
           Table.id = "PRONOTE_DISPLAY_TIMETABLE"
           var Hour = document.createElement("div")

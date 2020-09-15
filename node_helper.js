@@ -50,7 +50,7 @@ module.exports = NodeHelper.create({
     this.data["class"] = this.session.user.studentClass.name
     this.data["establishmentsInfo"] = this.session.user.establishmentsInfo
     this.data["holidays"] = this.session.params.publicHolidays
-    this.data["USER"] = this.session.user
+    //this.data["USER"] = this.session.user
     //this.data["PARAMS"] = this.session.params
     const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
     const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
@@ -84,6 +84,13 @@ module.exports = NodeHelper.create({
       course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
       course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
     })
+
+    /** don't display if it's not today **/
+    if (this.data.timetableOfTheDay.length > 0) {
+      let wanted = this.data.timetableOfTheDay[0].to.toLocaleDateString(this.config.language, { day: 'numeric' })
+      let now = new Date().toLocaleDateString(this.config.language, { day: 'numeric' })
+      if (wanted != now) this.data["timetableOfTheDay"] = []
+    }
 
     Array.from(this.data.timetableOfNextDay.timetable, (course) => {
       course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
