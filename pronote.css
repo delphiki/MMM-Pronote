@@ -1,3 +1,5 @@
+/** Need to be Cleaned ! and maybe simplify (and fixed) ... maybe :)))) **/
+
 .pronote-timetableOfNextDay,
 .pronote-timetableOfTheDay {
   font-size: 0.6em;
@@ -19,3 +21,93 @@
   color: #aaaaaa;
 }
 
+#PRONOTE_LOADING {
+  text-align: center;
+  font-size: 20px;
+}
+
+#PRONOTE_USER {
+ padding-bottom: 20px;
+}
+
+#PRONOTE_LOGO {
+  background-image: url(resources/pronote.png);
+  height: 62px;
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#PRONOTE_ICON {
+  background-image: url(resources/icon.png);
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-left: auto;
+  margin-right: auto;
+  color: #454545;
+  text-align: center;
+}
+
+#PRONOTE_DISPLAY_TIMETABLE {
+  display:flex;
+}
+
+#PRONOTE_DETAIL {
+  line-height: 0.9em;
+  padding-right: 1em;
+  font-size: x-large;
+  font-size: large;
+  text-align: left;
+}
+
+#PRONOTE_AVERAGES {
+  line-height: 0.9em;
+  padding-right: 1em;
+  font-size: x-large;
+  font-size: large;
+  padding-bottom: 15px;
+  text-align: left;
+}
+
+#PRONOTE_MARKS {
+  line-height: 0.9em;
+  padding-right: 1em;
+  font-size: x-large;
+  font-size: large;
+  padding-bottom: 15px;
+}
+
+#PRONOTE_TIMETABLES{
+  line-height: 0.9em;
+  padding-right: 1em;
+  font-size: x-large;
+  font-size: large;
+  padding-bottom: 15px;
+}
+
+#PRONOTE_TIMETABLE_DAY,
+PRONOTE_TIMETABLE_NEXT {
+ padding-bottom: 10px;
+}
+
+#PRONOTE_VALUES,
+#PRONOTE_HOURS {
+  margin-right: 15px;
+}
+
+#PRONOTE_TEXT_SIMPLE {
+  padding-bottom: 10px;
+}
+
+#PRONOTE_TEXT_UNDERLINE {
+  padding-bottom: 12px;
+  text-decoration: underline;
+}
+
+#PRONOTE_SUBJECT_VALUE {
+ padding-bottom: 5px;
+}
+.annuler {text-decoration:line-through;}

@@ -21,6 +21,7 @@ module.exports = NodeHelper.create({
     this.session.setKeepAlive(true)
 
     await this.fetchData()
+    this.sendSocketNotification("INITIALIZED")
     console.log("[PRONOTE] Pronote is initialized.")
   },
 
@@ -49,7 +50,7 @@ module.exports = NodeHelper.create({
     this.data["class"] = this.session.user.studentClass.name
     this.data["establishmentsInfo"] = this.session.user.establishmentsInfo
     this.data["holidays"] = this.session.params.publicHolidays
-    //this.data["USER"] = this.session.user
+    this.data["USER"] = this.session.user
     //this.data["PARAMS"] = this.session.params
     const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
     const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
@@ -78,11 +79,9 @@ module.exports = NodeHelper.create({
     this.data["menu"] = menu // le menu de la cantine
     this.data["homeworks"] = homeworks // liste des devoirs à faire
 
-    /** convert Dates en HH:MM et UNIX (peut-etre besoin? je verai ...) **/
+    /** convert Dates en HH:MM **/
     Array.from(this.data.timetableOfTheDay, course => {
-      course.fromUnix = Date.parse(course.from)
       course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-      course.toUnix = Date.parse(course.to)
       course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
     })
 
