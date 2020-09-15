@@ -1,4 +1,3 @@
-'use strict'
 /* Magic Mirror
  * Module: MMM-Pronote
  *
@@ -6,7 +5,6 @@
  * and @bugsounet
  * MIT Licensed.
  */
-
 
 Module.register("MMM-Pronote", {
   defaults: {
@@ -16,15 +14,13 @@ Module.register("MMM-Pronote", {
     password: null,
     cas: 'none',
     account: 'student',
-    user: null,
-    timetable: null,
-    timetableDay: null,
-    localizedTimetableDay: null,
     updateInterval: "1h",
   },
 
   start: function() {
    this.config = configMerge({}, this.defaults, this.config)
+   this.userData= {}
+   this.init= false
    if (this.config.debug) this.log = (...args) => { console.log("[PRONOTE]", ...args) }
    else this.log = (...args) => { /* do nothing */ }
   },
@@ -42,31 +38,46 @@ Module.register("MMM-Pronote", {
   },
 
   getTemplateData: function () {
-    return this.config
+    return this.userData
   },
 
-  updateData: function(data) {
-    this.config.user = data.name
-    this.log("data:", data)
-    this.log("typeof", typeof data.timetable.timetableDay)
-    this.log("user", this.config.user)
+/*
+ * Ju, tu veux le faire reelement avec un template ou en full JS/CSS ??
+ * De mon côté en template, pas trop ma tasse de thé...
+  getDom: function() {
+    console.log("dom")
+    var wrapper = document.createElement("div")
+    if (!this.init) {
+      wrapper.id = "PRONOTE_LOADING"
+      wrapper.innerHTML = "chargement"
 
-    Array.from(data.timetable.timetable, (course) => {
-      course.localizedFrom = (new Date(course.from)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-      course.localizedTo = (new Date(course.to)).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-    })
-    this.config.timetable = data.timetable.timetable
-    this.config.timetableDay = new Date(data.timetable.timetableDay)
-    this.config.localizedTimetableDay = this.config.timetableDay.toLocaleDateString(navigator.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    this.log("localized:", this.config.localizedTimetableDay)
-    this.log("timetable @bugsounet:", data.timetableOfTheDay)
-    this.log("timetable @ju:", data.timetable)
-    this.log("marks:", data.marks)
+      var logo = document.createElement("div")
+      logo.id = "PRONOTE_LOGO"
+      wrapper.appendChild(logo)
+
+    } else {
+      // prepare Dom
+    }
+    return wrapper
+  },
+*/
+
+  updateData: function(data) {
+    this.userData = data
+    if (!this.userData.name) return this.log ("Error... no data!")
+    this.log("user", this.userData.name)
+    this.log("data:", this.userData)
+
+    this.log("timetable @bugsounet:", this.userData.timetableOfTheDay)
+    this.log("timetable @ju:", this.userData.timetableOfNextDay)
+    this.log("marks:", this.userData.marks)
+    this.updateDom()  // <-- not really a good solution, we will do it in real time don't worry :)
   },
 
   notificationReceived: function(notification, payload, sender) {
     switch (notification) {
       case "ALL_MODULES_STARTED":
+        if (!this.config.language) this.config.language = config.language
         this.sendSocketNotification('SET_CONFIG', this.config)
         break
     }
@@ -78,6 +89,5 @@ Module.register("MMM-Pronote", {
         this.updateData(payload)
         break
     }
-    this.updateDom()  // <-- not really a good solution, we will do it in real time don't worry :)
-  }
+  },
 });

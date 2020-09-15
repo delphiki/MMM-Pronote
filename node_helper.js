@@ -1,6 +1,6 @@
 const pronote = require('pronote-api');
+const NodeHelper = require("node_helper");
 
-let NodeHelper = require("node_helper");
 let log = (...args) => { /* do nothing */ }
 
 module.exports = NodeHelper.create({
@@ -51,12 +51,15 @@ module.exports = NodeHelper.create({
     this.data["holidays"] = this.session.params.publicHolidays
     //this.data["USER"] = this.session.user
     //this.data["PARAMS"] = this.session.params
-
     const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
     const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
-    const timetable = await this.getTimetable(this.session, timetableDay)
+    const timetableOfNextDay = await this.getTimetable(this.session, timetableDay)
 
-    const timetableOfTheDay = await this.session.timetable()
+    let fromNow = new Date()
+    let from = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),fromNow.getHours(),0,0) // garde l'heure de cours actuelle
+    let to = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),18,0,0) // fin des cours a 18h
+    const timetableOfTheDay = await this.session.timetable(from,to)
+
     const marks = await this.session.marks()
     const contents = await this.session.contents()
     const evaluations = await this.session.evaluations()
@@ -66,7 +69,7 @@ module.exports = NodeHelper.create({
     const homeworks= await this.session.homeworks() // ? new api ?
 
     this.data["timetableOfTheDay"] = timetableOfTheDay // test de recup emploi du temps du jour (@bugsounet version)
-    this.data["timetable"] = { timetable: timetable, timetableDay: timetableDay } // ta version pour comparer
+    this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: timetableDay } // ta version pour comparer
     this.data["marks"] = marks // notes de l'eleve
     this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
     this.data["evaluations"] = evaluations // les resulat des evals
@@ -75,9 +78,25 @@ module.exports = NodeHelper.create({
     this.data["menu"] = menu // le menu de la cantine
     this.data["homeworks"] = homeworks // liste des devoirs à faire
 
+    /** convert Dates en HH:MM et UNIX (peut-etre besoin? je verai ...) **/
+    Array.from(this.data.timetableOfTheDay, course => {
+      course.fromUnix = Date.parse(course.from)
+      course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+      course.toUnix = Date.parse(course.to)
+      course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+    })
+
+    Array.from(this.data.timetableOfNextDay.timetable, (course) => {
+      course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+      course.localizedTo = (new Date(course.to)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+    })
+    var parseTimetableDay = new Date(this.data.timetableOfNextDay.timetableDay)
+    var localizedTimetableDay = parseTimetableDay.toLocaleDateString(this.config.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    this.data.timetableOfNextDay["localizedTimetableDay"] = localizedTimetableDay
+
     /** send all datas ... **/
     this.sendSocketNotification("PRONOTE_UPDATED", this.data)
-    //log("Data:", homeworks) // log as you want ;)
+    //log("Data:", this.data) // log as you want ;)
 
     /** Ok ! All info are sended auto-update it ! **/
     this.scheduleUpdate()

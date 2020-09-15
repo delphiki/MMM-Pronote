@@ -1,7 +1,9 @@
-.pronote-timetable {
+.pronote-timetableOfNextDay,
+.pronote-timetableOfTheDay {
   font-size: 0.6em;
 }
-.pronote-timetable tr {
+.pronote-timetableOfNextDay tr,
+.pronote-timetableOfTheDay tr {
   line-height: 0.8em;
   vertical-align: middle;
 }
