@@ -1,26 +1,5 @@
 /** Need to be Cleaned ! and maybe simplify (and fixed) ... maybe :)))) **/
 
-.pronote-timetableOfNextDay,
-.pronote-timetableOfTheDay {
-  font-size: 0.6em;
-}
-.pronote-timetableOfNextDay tr,
-.pronote-timetableOfTheDay tr {
-  line-height: 0.8em;
-  vertical-align: middle;
-}
-.pronote-class-schedule {
-  padding-right: 1em;
-}
-.pronote-class-subject {
-  text-align: left;
-  color: white;
-}
-.pronote-class-cancelled {
-  text-decoration: line-through;
-  color: #aaaaaa;
-}
-
 #PRONOTE_LOADING {
   text-align: center;
   font-size: 20px;
@@ -28,11 +7,14 @@
 
 #PRONOTE_USER {
  padding-bottom: 20px;
+ font-size: x-large;
+ text-align: center;
 }
 
 #PRONOTE_LOGO {
   background-image: url(resources/pronote.png);
-  height: 62px;
+  height: 100px;
+  width: 270px;
   background-size: 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -49,6 +31,7 @@
   margin-right: auto;
   color: #454545;
   text-align: center;
+  font-size: xx-large;
 }
 
 #PRONOTE_DISPLAY_TIMETABLE {
@@ -56,46 +39,42 @@
 }
 
 #PRONOTE_DETAIL {
-  line-height: 0.9em;
+  line-height: 1em;
   padding-right: 1em;
-  font-size: x-large;
-  font-size: large;
+  font-size: medium;
   text-align: left;
+  display: flex;
 }
 
 #PRONOTE_AVERAGES {
   line-height: 0.9em;
   padding-right: 1em;
-  font-size: x-large;
-  font-size: large;
+  font-size: medium;
   padding-bottom: 15px;
   text-align: left;
+  display: flex;
 }
 
-#PRONOTE_MARKS {
-  line-height: 0.9em;
-  padding-right: 1em;
-  font-size: x-large;
-  font-size: large;
-  padding-bottom: 15px;
-}
-
+#PRONOTE_MARKS,
+#PRONOTE_HOLIDAYS,
+#PRONOTE_HOMEWORKS,
 #PRONOTE_TIMETABLES{
-  line-height: 0.9em;
+  line-height: 1em;
   padding-right: 1em;
-  font-size: x-large;
-  font-size: large;
+  font-size: medium;
   padding-bottom: 15px;
+  text-align: center;
 }
 
 #PRONOTE_TIMETABLE_DAY,
-PRONOTE_TIMETABLE_NEXT {
+#PRONOTE_TIMETABLE_NEXT {
  padding-bottom: 10px;
 }
 
+#PRONOTE_AV_STUDENT,
 #PRONOTE_VALUES,
 #PRONOTE_HOURS {
-  margin-right: 15px;
+  margin-right: 10px;
 }
 
 #PRONOTE_TEXT_SIMPLE {
@@ -108,6 +87,29 @@ PRONOTE_TIMETABLE_NEXT {
 }
 
 #PRONOTE_SUBJECT_VALUE {
- padding-bottom: 5px;
+  padding-bottom: 5px;
+}
+
+#PRONOTE_TEACHER,
+#PRONOTE_ROOM,
+#PRONOTE_CANCEL {
+  margin-right: 5px
+}
+
+#PRONOTE_VALUES_DESCRIPTION {
+  width: 250px;
+}
+
+#PRONOTE_HOMEWORKS_VALUES {
+  width: 100px;
+  margin-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#PRONOTE_ERROR {
+  padding-bottom: 10px;
+  font-size: large;
 }
 .annuler {text-decoration:line-through;}

@@ -14,16 +14,39 @@ Module.register("MMM-Pronote", {
     password: null,
     cas: 'none',
     account: 'student',
-    updateInterval: "1h",
-    displayTimetable: true,
-    displayAverage: true,
-    displayMarks: true
+    updateInterval: "30s",
+    Timetables: {
+      displayActual: true,
+      displayNextDay: true,
+      displayTeacher: true,
+      displayRoom: true
+    },
+    Averages: {
+      display : true,
+      displayStudent: true,
+      displayClass: true
+    },
+    Marks: {
+      display: true,
+      displayAverage: true,
+      displayCoeff: true
+    },
+    Homeworks: {
+      display: true,
+      searchDays: 7,
+      displayDescription: true
+    },
+    Holidays: {
+      display: true,
+      number: 3
+    }
   },
 
   start: function() {
    this.config = configMerge({}, this.defaults, this.config)
    this.userData= {}
    this.init= false
+   this.error= null
    if (this.config.debug) this.log = (...args) => { console.log("[PRONOTE]", ...args) }
    else this.log = (...args) => { /* do nothing */ }
   },
@@ -35,21 +58,9 @@ Module.register("MMM-Pronote", {
   getStyles: function() {
     return ["pronote.css"]
   },
-/*
-  getTemplate: function () {
-    return "pronote.njk"
-  },
 
-  getTemplateData: function () {
-    return this.userData
-  },
-*/
-
-/*
- * Ju, tu veux le faire reelement avec un template ou en full JS/CSS ??
- * De mon côté en template, pas trop ma tasse de thé...
- */
   getDom: function() {
+    const fromNow = new Date()
     var wrapper = document.createElement("div")
     if (!this.init) {
       wrapper.id = "PRONOTE_LOADING"
@@ -60,6 +71,18 @@ Module.register("MMM-Pronote", {
       loadingText.innerHTML = this.translate("LOADING")
       wrapper.appendChild(logo)
       wrapper.appendChild(loadingText)
+    } else if(Object.keys(this.userData).length == 0) {
+      wrapper.id = "PRONOTE"
+      var loading = document.createElement("div")
+      loading.id = "PRONOTE_LOADING"
+      var logo = document.createElement("div")
+      logo.id = "PRONOTE_LOGO"
+      loading.appendChild(logo)
+      var error = document.createElement("div")
+      error.id = "PRONOTE_ERROR"
+      error.innerHTML = this.error ? this.error : "Erreur... Aucune données"
+      wrapper.appendChild(loading)
+      wrapper.appendChild(error)
     } else {
       var icon = document.createElement("div")
       icon.id= "PRONOTE_ICON"
@@ -68,15 +91,14 @@ Module.register("MMM-Pronote", {
 
       var user = document.createElement("div")
       user.id = "PRONOTE_USER"
-      //user.textContent = "@bugsounet (6e2)" // for screenshot :)))
+      //user.textContent = "@bugsounet (Maternelle Sup.)" // for screenshot :)))
       user.textContent = this.userData.name + " (" + this.userData.class + ")"
       wrapper.appendChild(user)
 
       /** Display TimeTables **/
-      if (this.config.displayTimetable) {
-        var timetable = document.createElement("div")
-        timetable.id = "PRONOTE_TIMETABLES"
-
+      var timetable = document.createElement("div")
+      timetable.id = "PRONOTE_TIMETABLES"
+      if (this.config.Timetables.displayActual) {
         /** Aujourd'hui ? **/
         var day = document.createElement("div")
         day.id = "PRONOTE_TIMETABLE_DAY"
@@ -102,12 +124,27 @@ Module.register("MMM-Pronote", {
             Hour.classList.add("annuler")
             Value.classList.add("annuler")
             var Cancel = document.createElement("div")
+            Cancel.id = "PRONOTE_CANCEL"
             Cancel.textContent = table.isAway ? "(Absent)" : "(Cours annulé)"
             Table.appendChild(Cancel)
+          } else {
+            if (this.config.Timetables.displayTeacher) {
+              var teacher = document.createElement("div")
+              teacher.id = "PRONOTE_TEACHER"
+              teacher.textContent = "Avec "+ table.teacher
+              Table.appendChild(teacher)
+            }
+            if (this.config.Timetables.displayRoom) {
+              var room = document.createElement("div")
+              room.id= "PRONOTE_ROOM"
+              room.textContent = "["+ table.room+ "]"
+              Table.appendChild(room)
+            }
           }
           day.appendChild(Table)
         })
-
+      }
+      if (this.config.Timetables.displayNextDay) {
         /** Et demain ? **/
         var next = document.createElement("div")
         next.id = "PRONOTE_TIMETABLE_NEXT"
@@ -135,49 +172,148 @@ Module.register("MMM-Pronote", {
             var Cancel = document.createElement("div")
             Cancel.textContent = table.isAway ? "(Absent)" : "(Cours annulé)"
             Table.appendChild(Cancel)
+          } else {
+            if (this.config.Timetables.displayTeacher) {
+              var teacher = document.createElement("div")
+              teacher.id = "PRONOTE_TEACHER"
+              teacher.textContent = "Avec "+ table.teacher
+              Table.appendChild(teacher)
+            }
+            if (this.config.Timetables.displayRoom) {
+              var room = document.createElement("div")
+              room.id= "PRONOTE_ROOM"
+              room.textContent = "["+ table.room+ "]"
+              Table.appendChild(room)
+            }
           }
           next.appendChild(Table)
         })
-        wrapper.appendChild(timetable)
-      }
+       }
+       wrapper.appendChild(timetable)
 
-      /** Display average @tofinish **/
-      if (this.config.displayAverage) {
+      /** Display average **/
+      if (this.config.Averages.display && this.userData.marks.averages.student) {
+
         var average = document.createElement("div")
         average.id = "PRONOTE_AVERAGES"
-        var averageText = document.createElement("div")
-        averageText.id = "PRONOTE_TEXT_SIMPLE"
-        averageText.textContent = "Moyenne générale: " + this.userData.marks.averages.student + " - Moyenne classe: " +  this.userData.marks.averages.studentClass
-        average.appendChild(averageText)
+        if (this.config.Averages.displayStudent) {
+          var studentAV = document.createElement("div")
+          studentAV.id = "PRONOTE_AV_STUDENT"
+          studentAV.textContent = "Moyenne générale: " + this.userData.marks.averages.student
+          average.appendChild(studentAV)
+        }
+        if (this.config.Averages.displayClass) {
+          var classAV = document.createElement("div")
+          classAV.id = "PRONOTE_AV_CLASS"
+          classAV.textContent = "Moyenne classe: " +  this.userData.marks.averages.studentClass
+          average.appendChild(classAV)
+        }
         wrapper.appendChild(average)
-       }
+      }
 
-       /** Display Marks @tofinish too !**/
-       if (this.config.displayMarks) {
+       /** Display Marks **/
+       if (this.config.Marks.display && this.userData.marks.subjects.length > 0) {
          var marks = document.createElement("div")
          marks.id = "PRONOTE_MARKS"
          var marksText = document.createElement("div")
          marksText.id = "PRONOTE_TEXT_UNDERLINE"
          marksText.textContent = "Dernières notes:"
          marks.appendChild(marksText)
+
+         /** search subjects **/
          this.userData.marks.subjects.forEach(subjects => {
            var subject = document.createElement("div")
            subject.id = "PRONOTE_SUBJECT"
            marks.appendChild(subject)
            var subjectValue = document.createElement("div")
            subjectValue.id = "PRONOTE_SUBJECT_VALUE"
-           subjectValue.textContent = subjects.name + " (Moyenne: " + subjects.averages.student +")"
+           subjectValue.textContent = subjects.name + (this.config.Marks.displayAverage ? " (Moyenne: " + subjects.averages.student +")" : "")
            subject.appendChild(subjectValue)
+
+           /** search all marks **/
            subjects.marks.forEach(marks => {
              var detail = document.createElement("div")
              detail.id = "PRONOTE_DETAIL"
-             // @todo better ...
-             detail.textContent = new Date(marks.date).toLocaleDateString() + " " + marks.title + ": " + marks.value + "/" + marks.scale + " Coeff: " + marks.coefficient 
+             var when = document.createElement("div")
+             when.id = "PRONOTE_HOURS"
+             when.textContent = this.myDate(marks.date,true)
+             detail.appendChild(when)
+             var title = document.createElement("div")
+             title.id = "PRONOTE_VALUES"
+             title.textContent = marks.title
+             detail.appendChild(title)
+             var marksValue = document.createElement("div")
+             marksValue.id = "PRONOTE_VALUES"
+             marksValue.textContent = marks.value + "/" +  marks.scale
+             detail.appendChild(marksValue)
+             if(this.config.Marks.displayCoeff) {
+               var coeff = document.createElement("div")
+               coeff.id = "PRONOTE_VALUES"
+               coeff.textContent = "Coeff: " + marks.coefficient
+               detail.appendChild(coeff)
+             }
              subject.appendChild(detail)
            })
          })
          wrapper.appendChild(marks)
        }
+
+       /** Display Homeworks **/
+       if(this.config.Homeworks.display) {
+         var homeworks = document.createElement("div")
+         homeworks.id = "PRONOTE_HOMEWORKS"
+         var homeworksText = document.createElement("div")
+         homeworksText.id = "PRONOTE_TEXT_UNDERLINE"
+         homeworksText.textContent = this.userData.homeworks.length > 0 ? "Devoirs à faire:" : "Pas de devoirs cette semaine !"
+         homeworks.appendChild(homeworksText)
+         /** ok, Ya du boulot a faire... on affiche ça ! **/
+         this.userData.homeworks.forEach(Homeworks => {
+           var homeworksDetail = document.createElement("div")
+           homeworksDetail.id = "PRONOTE_DETAIL"
+           var homeworksDate = document.createElement("div")
+           homeworksDate.id = "PRONOTE_HOURS"
+           homeworksDate.textContent = this.myDate(Homeworks.for,true)
+           homeworksDetail.appendChild(homeworksDate)
+           var homeworksSubject = document.createElement("div")
+           homeworksSubject.id = "PRONOTE_HOMEWORKS_VALUES"
+           homeworksSubject.textContent = Homeworks.subject
+           homeworksDetail.appendChild(homeworksSubject)
+           if (this.config.Homeworks.displayDescription) {
+             var homeworksTitle = document.createElement("div")
+             homeworksTitle.id = "PRONOTE_VALUES_DESCRIPTION"
+             homeworksTitle.textContent = Homeworks.description
+             homeworksDetail.appendChild(homeworksTitle)
+           }
+           homeworks.appendChild(homeworksDetail)
+         })
+         wrapper.appendChild(homeworks)
+      }
+      /** vacances **/
+      if(this.config.Holidays.display) {
+        var holidays = document.createElement("div")
+        holidays.id = "PRONOTE_HOLIDAYS"
+        var holidaysText = document.createElement("div")
+        holidaysText.id = "PRONOTE_TEXT_UNDERLINE"
+        holidaysText.textContent = "Prochaines vacances:"
+        holidays.appendChild(holidaysText)
+
+        this.userData.holidays.forEach( (Holidays,nb) => {
+          if (nb >= this.config.Holidays.number && this.config.Holidays.number) return
+          var holidaysDetail = document.createElement("div")
+          holidaysDetail.id = "PRONOTE_DETAIL"
+          var holidaysDate = document.createElement("div")
+          holidaysDate.id = "PRONOTE_HOURS"
+          holidaysDate.textContent = "Du " + this.myDate(Holidays.from) + " au " + this.myDate(Holidays.to)
+          holidaysDetail.appendChild(holidaysDate)
+          var holidaysTitle = document.createElement("div")
+          holidaysTitle.id = "PRONOTE_VALUES"
+          holidaysTitle.textContent = Holidays.name
+          holidaysDetail.appendChild(holidaysTitle)
+
+          holidays.appendChild(holidaysDetail)
+        })
+        wrapper.appendChild(holidays)
+      }
     }
     return wrapper
   },
@@ -187,9 +323,7 @@ Module.register("MMM-Pronote", {
     if (!this.userData.name) return this.log ("Error... no data!")
 
     this.log("data:", this.userData)
-
-    this.log("marks:", this.userData.marks)
-    if (this.init) this.updateDom(1000)
+    if (this.init) this.updateDom(500)
   },
 
   notificationReceived: function(notification, payload, sender) {
@@ -204,12 +338,33 @@ Module.register("MMM-Pronote", {
   socketNotificationReceived: function(notification, payload) {
     switch (notification) {
       case "PRONOTE_UPDATED":
-        this.updateData(payload)
+        if (payload) this.updateData(payload)
         break
       case "INITIALIZED":
-        this.init = true
-        this.updateDom(500)
+          this.init = true
+          this.updateDom(500)
+        break
+      case "ERROR":
+        this.error = payload
         break
     }
   },
+
+  /** Tools **/
+  myGetDate: function (date) {
+     return new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)
+  },
+
+  myDate: function(date, min = false) {
+    var NewDate = null
+    if (!min) NewDate = new Date(date).toLocaleDateString()
+    else {
+      var getDate = new Date(date).getDate()
+      var getMonth = new Date(date).getMonth()+1
+      if (getDate < 10 ) getDate = "0"+getDate
+      if (getMonth <10 ) getMonth = "0"+getMonth
+      NewDate = getDate + "/" + getMonth
+    }
+    return NewDate
+  }
 });
