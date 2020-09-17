@@ -158,7 +158,7 @@ Module.register("MMM-Pronote", {
         timetable.appendChild(next)
         var nextText = document.createElement("div")
         nextText.id = "PRONOTE_TEXT_UNDERLINE"
-        nextText.textContent = this.userData.timetableOfNextDay.localizedTimetableDay
+        nextText.textContent = this.userData.timetableOfNextDay.timetableDay
         next.appendChild(nextText)
 
         this.userData.timetableOfNextDay.timetable.forEach(table => {

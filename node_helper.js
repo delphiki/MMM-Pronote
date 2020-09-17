@@ -113,12 +113,12 @@ module.exports = NodeHelper.create({
     this.data["menu"] = menu // le menu de la cantine
     this.data["evaluations"] = evaluations // les resulat des evals
     this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
+    this.data["absences"] = absences // les absences ..
     */
 
     this.data["timetableOfTheDay"] = timetableOfTheDay
     this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
     this.data["marks"] = marks // notes de l'eleve
-    this.data["absences"] = absences // les absences ..
     this.data["homeworks"] = homeworks // liste des devoirs à faire
 
     /** convert Dates en HH:MM **/
@@ -138,9 +138,6 @@ module.exports = NodeHelper.create({
       course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
       course.localizedTo = (new Date(course.to)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
     })
-    var parseTimetableDay = new Date(this.data.timetableOfNextDay.timetableDay)
-    var localizedTimetableDay = parseTimetableDay.toLocaleDateString(this.config.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    this.data.timetableOfNextDay["localizedTimetableDay"] = localizedTimetableDay
 
     /** don't display holidays if finish ! **/
     this.data.holidays.forEach((Holidays,nb) => {
