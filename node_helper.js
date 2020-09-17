@@ -36,7 +36,7 @@ module.exports = NodeHelper.create({
   pronote: async function() {
     this.session= null
     this.session = await this.login()
-    if (this.config.PronoteKeepAlive) this.session.setKeepAlive(true)
+    if (this.config.PronoteKeepAlive && this.session) this.session.setKeepAlive(true)
     await this.fetchData()
   },
 
