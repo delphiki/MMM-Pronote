@@ -3,12 +3,6 @@
 # | npm preinstall |
 # +----------------+
 
-# with or without prompt ?
-prompt=true
-if [ -e no-prompt ]; then
-  prompt=false
-fi
-
 # get the installer directory
 Installer_get_current_dir () {
   SOURCE="${BASH_SOURCE[0]}"
