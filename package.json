@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/delphiki/MMM-Pronote.git"
   },
+  "scripts": {
+    "update": "installer/update.sh"
+  },
   "keywords": [
     "magicmirror",
     "pronote"
