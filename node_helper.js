@@ -1,4 +1,5 @@
-const pronote = require('pronote-api');
+const pronote = require('@bugsounet/pronote-api');
+const npmCheck = require("@bugsounet/npmcheck");
 const NodeHelper = require("node_helper");
 
 let log = (...args) => { /* do nothing */ }
@@ -7,6 +8,8 @@ module.exports = NodeHelper.create({
    start: function() {
     /** initialize all value there **/
     this.session = null
+    this.interval = null
+    this.Checker = null
     this.data = {}
   },
 
@@ -14,18 +17,26 @@ module.exports = NodeHelper.create({
     console.log("[PRONOTE] MMM-Pronote Version:", require('./package.json').version)
     this.config = config
     if (this.config.debug) log = (...args) => { console.log("[PRONOTE]", ...args) }
-    this.interval = null
     this.updateIntervalMilliseconds = this.getUpdateIntervalMillisecondFromString(this.config.updateInterval)
-    this.session = null
     await this.pronote()
-
     this.sendSocketNotification("INITIALIZED")
+    /** check if update of npm Library needed **/
+    if (this.config.NPMCheck.useChecker) {
+      var cfg = {
+        dirName: __dirname,
+        moduleName: this.name,
+        timer: this.getUpdateIntervalMillisecondFromString(this.config.NPMCheck.delay),
+        debug: this.config.debug
+      }
+      this.Checker= new npmCheck(cfg, update => { this.sendSocketNotification("NPM_UPDATE", update)} )
+    }
     console.log("[PRONOTE] Pronote is initialized.")
   },
 
   pronote: async function() {
     this.session= null
     this.session = await this.login()
+    if (this.config.PronoteKeepAlive) this.session.setKeepAlive(true)
     await this.fetchData()
   },
 
@@ -51,7 +62,7 @@ module.exports = NodeHelper.create({
         }
         else {
           /** erreur du code merdique de Pronote-api ? **/
-          console.error("[PRONOTE] Error", err)
+          console.error("[PRONOTE] API Error", err)
           setTimout(async () => { await this.pronote() } , 3000)
         }
       }
@@ -73,13 +84,21 @@ module.exports = NodeHelper.create({
     let from = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),fromNow.getHours(),0,0) // garde l'heure de cours actuelle
     let to = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),18,0,0) // fin des cours a 18h
     let toHomeworksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
+    let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
 
-    const filledDaysAndWeeks = await pronote.fetchTimetableDaysAndWeeks(this.session)
-    const timetableDay = this.getNextDayOfClass(filledDaysAndWeeks.filledDays)
-    const timetableOfNextDay = await this.getTimetable(this.session, timetableDay)
+    /** calculate next day of school **/
+    let next = 1
+    let day = fromNow.getDay()
+    if (day == 5) next = 3
+    if (day == 6) next = 2
+    let FromNextDay = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,0,0,0)
+    let ToNextDay =  new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,18,0,0)
+    const timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay) //fetch table Of Next day of school
+    const NextDay = new Date(FromNextDay).toLocaleDateString(this.config.language, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
+
     const timetableOfTheDay = await this.session.timetable(from,to)
-    const marks = await this.session.marks()
-    const absences = await this.session.absences()
+    const marks = await this.session.marks(from,toMarksSearch)
+
     const homeworks= await this.session.homeworks(from,toHomeworksSearch)
 
     /* reserved for later ?
@@ -87,6 +106,8 @@ module.exports = NodeHelper.create({
     const menu = await this.session.menu()
     const evaluations = await this.session.evaluations()
     const contents = await this.session.contents()
+    const absences = await this.session.absences()
+    let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Absences.searchDays,0,0,0)
 
     this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
     this.data["menu"] = menu // le menu de la cantine
@@ -95,7 +116,7 @@ module.exports = NodeHelper.create({
     */
 
     this.data["timetableOfTheDay"] = timetableOfTheDay
-    this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: timetableDay }
+    this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
     this.data["marks"] = marks // notes de l'eleve
     this.data["absences"] = absences // les absences ..
     this.data["homeworks"] = homeworks // liste des devoirs à faire
@@ -138,38 +159,6 @@ module.exports = NodeHelper.create({
     this.scheduleUpdate()
   },
 
-  getTimetable: async function(session, date = null) {
-    return await session.timetable(date)
-  },
-
-  getDayOfYear: function() {
-    let now = new Date()
-    let start = new Date(now.getFullYear(), 0, 0)
-    let diff = now - start
-    let oneDay = 1000 * 60 * 60 * 24
-
-    return Math.floor(diff / oneDay)
-  },
-
- /** !!! Ne fonctionne pas si le jour actual est un week end **/
- /** !!! retroune l'emploi du temps du Mardi ! **/
- /** !!! @todo:
- /** !!! @ju, peux tu mettre une condition pour sauter les samedi et dimanche ? **/
-  getNextDayOfClass: function(filledDays) {
-    const currentDay = this.getDayOfYear()
-    let nextDayOfClassNumber = currentDay
-    for (let i = 0; i < filledDays.length; i++) {
-      if (filledDays[i] > currentDay) {
-        nextDayOfClassNumber = filledDays[i]
-        break
-      }
-    }
-
-    let firstDayOfYear = new Date((new Date()).getFullYear(), 0)
-
-    return new Date(firstDayOfYear.setDate(nextDayOfClassNumber))
-  },
-
   socketNotificationReceived: function(notification, payload) {
     switch(notification) {
       case 'SET_CONFIG':
@@ -186,7 +175,8 @@ module.exports = NodeHelper.create({
    }
    clearInterval(this.interval)
    this.interval = setInterval(async () => {
-     await this.pronote()
+     if (this.config.PronoteKeepAlive) await this.fetchData()
+     else await this.pronote()
      log("Pronote data updated.")
    }, nextLoad)
   },

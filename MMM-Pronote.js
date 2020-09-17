@@ -15,6 +15,7 @@ Module.register("MMM-Pronote", {
     cas: 'none',
     account: 'student',
     updateInterval: "30s",
+    PronoteKeepAlive: true, // testing
     Timetables: {
       displayActual: true,
       displayNextDay: true,
@@ -28,6 +29,7 @@ Module.register("MMM-Pronote", {
     },
     Marks: {
       display: true,
+      searchDays: 7,
       displayAverage: true,
       displayCoeff: true
     },
@@ -39,6 +41,11 @@ Module.register("MMM-Pronote", {
     Holidays: {
       display: true,
       number: 3
+    },
+    NPMCheck: {
+      useChecker: true,
+      delay: "45m",
+      useAlert: true
     }
   },
 
@@ -338,7 +345,10 @@ Module.register("MMM-Pronote", {
   socketNotificationReceived: function(notification, payload) {
     switch (notification) {
       case "PRONOTE_UPDATED":
-        if (payload) this.updateData(payload)
+        if (payload) {
+          this.updateData(payload)
+          this.sendNotification("PRONOTE_DATA", payload)
+        }
         break
       case "INITIALIZED":
           this.init = true
@@ -346,6 +356,19 @@ Module.register("MMM-Pronote", {
         break
       case "ERROR":
         this.error = payload
+        break
+      case "NPM_UPDATE":
+        if (payload) {
+          if (this.config.NPMCheck.useAlert) {
+            this.sendNotification("SHOW_ALERT", {
+              type: "notification" ,
+              message: "[NPM] " + payload.library + " v" + payload.installed +" -> v" + payload.latest,
+              title: this.translate("UPDATE_NOTIFICATION_MODULE", { MODULE_NAME: payload.module }),
+              timer: this.config.NPMCheck.delay - 2000
+            })
+          }
+          this.sendNotification("NPM_UPDATE", payload)
+        }
         break
     }
   },
