@@ -16,6 +16,10 @@ Module.register("MMM-Pronote", {
     account: 'student',
     updateInterval: "1h",
     PronoteKeepAlive: true, // testing
+    Header: {
+      displayEstablishmentName: true,
+      displayStudentName: true,
+    },
     Timetables: {
       displayActual: true,
       displayNextDay: true,
@@ -91,16 +95,20 @@ Module.register("MMM-Pronote", {
       wrapper.appendChild(loading)
       wrapper.appendChild(error)
     } else {
-      var icon = document.createElement("div")
-      icon.id= "PRONOTE_ICON"
-      icon.textContent = this.userData.establishmentsInfo[0].name
-      wrapper.appendChild(icon)
+      if (this.config.Header.displayEstablishmentName) {
+        var icon = document.createElement("div")
+        icon.id= "PRONOTE_ICON"
+        icon.textContent = this.userData.establishmentsInfo[0].name
+        wrapper.appendChild(icon)
+      }
 
-      var user = document.createElement("div")
-      user.id = "PRONOTE_USER"
-      //user.textContent = "@bugsounet (Maternelle Sup.)" // for screenshot :)))
-      user.textContent = this.userData.name + " (" + this.userData.class + ")"
-      wrapper.appendChild(user)
+      if (this.config.Header.displayStudentName) {
+        var user = document.createElement("div")
+        user.id = "PRONOTE_USER"
+        //user.textContent = "@bugsounet (Maternelle Sup.)" // for screenshot :)))
+        user.textContent = this.userData.name + " (" + this.userData.class + ")"
+        wrapper.appendChild(user)
+      }
 
       /** Display TimeTables **/
       var timetable = document.createElement("div")
