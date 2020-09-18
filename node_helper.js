@@ -73,84 +73,110 @@ module.exports = NodeHelper.create({
     /** create or update data object **/
     log("Pronote fetch data.")
     if (!this.session) return console.log("[PRONOTE] Error... No session !")
-    this.data["name"] = this.session.user.name
-    this.data["class"] = this.session.user.studentClass.name
-    this.data["establishmentsInfo"] = this.session.user.establishmentsInfo
-    this.data["holidays"] = this.session.params.publicHolidays
-    //this.data["USER"] = this.session.user
-    //this.data["PARAMS"] = this.session.params
+
+    /** fetch ONLY needed part from config **/
+
+    if (this.config.Header.displayStudentName) {
+      this.data["name"] = this.session.user.name
+      if (this.config.Header.displayStudentClass) {
+        this.data["class"] = this.session.user.studentClass.name
+      }
+      if (this.config.Header.displayAvatar) {
+        this.data["avatar"] = this.session.user.avatar
+      }
+    }
+
+    if (this.config.Header.displayEstablishmentName) {
+      this.data["establishmentsInfo"] = this.session.user.establishmentsInfo
+    }
 
     let fromNow = new Date()
     let from = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),fromNow.getHours(),0,0) // garde l'heure de cours actuelle
-    let to = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),18,0,0) // fin des cours a 18h
-    let toHomeworksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
-    let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
 
-    /** calculate next day of school **/
-    let next = 1
-    let day = fromNow.getDay()
-    if (day == 5) next = 3
-    if (day == 6) next = 2
-    let FromNextDay = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,0,0,0)
-    let ToNextDay =  new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,18,0,0)
-    const timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay) //fetch table Of Next day of school
-    const NextDay = new Date(FromNextDay).toLocaleDateString(this.config.language, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
+    if (this.config.Timetables.displayActual) {
+      let to = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),18,0,0) // fin des cours a 18h
+      const timetableOfTheDay = await this.session.timetable(from,to)
+      this.data["timetableOfTheDay"] = timetableOfTheDay
 
-    const timetableOfTheDay = await this.session.timetable(from,to)
-    const marks = await this.session.marks(from,toMarksSearch)
+      /** convert Dates en HH:MM **/
+      Array.from(this.data.timetableOfTheDay, course => {
+        course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+        course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+      })
 
-    const homeworks= await this.session.homeworks(from,toHomeworksSearch)
-
-    /* reserved for later ?
-    const infos = await this.session.infos()
-    const menu = await this.session.menu()
-    const evaluations = await this.session.evaluations()
-    const contents = await this.session.contents()
-    const absences = await this.session.absences()
-    let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Absences.searchDays,0,0,0)
-
-    this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
-    this.data["menu"] = menu // le menu de la cantine
-    this.data["evaluations"] = evaluations // les resulat des evals
-    this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
-    this.data["absences"] = absences // les absences ..
-    */
-
-    this.data["timetableOfTheDay"] = timetableOfTheDay
-    this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
-    this.data["marks"] = marks // notes de l'eleve
-    this.data["homeworks"] = homeworks // liste des devoirs à faire
-
-    /** convert Dates en HH:MM **/
-    Array.from(this.data.timetableOfTheDay, course => {
-      course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-      course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-    })
-
-    /** don't display if it's not today **/
-    if (this.data.timetableOfTheDay.length > 0) {
-      let wanted = this.data.timetableOfTheDay[0].to.toLocaleDateString(this.config.language, { day: 'numeric' })
-      let now = new Date().toLocaleDateString(this.config.language, { day: 'numeric' })
-      if (wanted != now) this.data["timetableOfTheDay"] = []
+      /** don't display if it's not today **/
+      if (this.data.timetableOfTheDay.length > 0) {
+        let wanted = this.data.timetableOfTheDay[0].to.toLocaleDateString(this.config.language, { day: 'numeric' })
+        let now = new Date().toLocaleDateString(this.config.language, { day: 'numeric' })
+        if (wanted != now) this.data["timetableOfTheDay"] = []
+      }
     }
 
-    Array.from(this.data.timetableOfNextDay.timetable, (course) => {
-      course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-      course.localizedTo = (new Date(course.to)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-    })
+    if (this.config.Timetables.displayNextDay) {
+      /** calculate next day of school **/
+      let next = 1
+      let day = fromNow.getDay()
+      if (day == 5) next = 3
+      if (day == 6) next = 2
+      let FromNextDay = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,0,0,0)
+      let ToNextDay =  new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,18,0,0)
+      const NextDay = new Date(FromNextDay).toLocaleDateString(this.config.language, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
+      const timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay) //fetch table Of Next day of school
 
-    /** don't display holidays if finish ! **/
-    this.data.holidays.forEach((Holidays,nb) => {
-      if (fromNow > Holidays.to) {
-        log("Delete Holidays:", Holidays)
-        delete this.data.holidays[nb]
-      }
-    })
-    this.data.holidays = this.cleanArray(this.data.holidays)
+      this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
+      Array.from(this.data.timetableOfNextDay.timetable, (course) => {
+        course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+        course.localizedTo = (new Date(course.to)).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+      })
+    }
+
+    if (this.config.Averages.display || this.config.Marks.display) {
+      let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
+      const marks = await this.session.marks(from,toMarksSearch)
+      this.data["marks"] = marks // notes de l'eleve
+    }
+
+    if (this.config.Homeworks.display) {
+      let toHomeworksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
+      const homeworks= await this.session.homeworks(from,toHomeworksSearch)
+      this.data["homeworks"] = homeworks // liste des devoirs à faire
+    }
+
+    if (this.config.Holidays.display) {
+      this.data["holidays"] = this.session.params.publicHolidays
+      /** don't display holidays if finish ! **/
+      this.data.holidays.forEach((Holidays,nb) => {
+        if (fromNow > Holidays.to) {
+          log("Delete Holidays:", Holidays)
+          delete this.data.holidays[nb]
+        }
+      })
+      this.data.holidays = this.cleanArray(this.data.holidays)
+    }
+
+    if (this.config.debug) {
+      //this.data["USER"] = this.session.user
+      //this.data["PARAMS"] = this.session.params
+      // reserved for later ?
+      /*
+      const infos = await this.session.infos()
+      const menu = await this.session.menu()
+      const evaluations = await this.session.evaluations()
+      const contents = await this.session.contents()
+      const absences = await this.session.absences()
+      let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Absences.searchDays,0,0,0)
+
+      this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
+      this.data["menu"] = menu // le menu de la cantine
+      this.data["evaluations"] = evaluations // les resulat des evals
+      this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
+      this.data["absences"] = absences // les absences ...
+      */
+      //log("Data:", this.data) // log as you want ;)
+    }
 
     /** send all datas ... **/
     this.sendSocketNotification("PRONOTE_UPDATED", this.data)
-    //log("Data:", this.data) // log as you want ;)
 
     /** Ok ! All info are sended auto-update it ! **/
     this.scheduleUpdate()
@@ -177,6 +203,10 @@ module.exports = NodeHelper.create({
      log("Pronote data updated.")
    }, nextLoad)
   },
+
+  /** ***** **/
+  /** Tools **/
+  /** ***** **/
 
   /** convert h m s to ms (good idea !) **/
   getUpdateIntervalMillisecondFromString: function(intervalString) {
@@ -212,6 +242,7 @@ module.exports = NodeHelper.create({
     return updateIntervalMillisecond
   },
 
+  /** Delete empty value of an Array **/
   cleanArray: function(actual) {
     var newArray = new Array();
     for (var i = 0; i < actual.length; i++) {

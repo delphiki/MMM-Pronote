@@ -6,7 +6,18 @@
 }
 
 #PRONOTE_USER {
- padding-bottom: 20px;
+  display:flex;
+  padding-bottom: 10px;
+  padding-top: 5px;
+  justify-content: center;
+}
+
+#PRONOTE_AVATAR {
+  height: 50px;
+  padding-right: 10px;
+}
+
+#PRONOTE_NAME {
  font-size: x-large;
  text-align: center;
 }

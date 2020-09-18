@@ -19,6 +19,8 @@ Module.register("MMM-Pronote", {
     Header: {
       displayEstablishmentName: true,
       displayStudentName: true,
+      displayStudentClass: true,
+      displayAvatar: true
     },
     Timetables: {
       displayActual: true,
@@ -71,7 +73,6 @@ Module.register("MMM-Pronote", {
   },
 
   getDom: function() {
-    const fromNow = new Date()
     var wrapper = document.createElement("div")
     if (!this.init) {
       wrapper.id = "PRONOTE_LOADING"
@@ -105,8 +106,17 @@ Module.register("MMM-Pronote", {
       if (this.config.Header.displayStudentName) {
         var user = document.createElement("div")
         user.id = "PRONOTE_USER"
-        //user.textContent = "@bugsounet (Maternelle Sup.)" // for screenshot :)))
-        user.textContent = this.userData.name + " (" + this.userData.class + ")"
+        if (this.config.Header.displayAvatar && this.userData.avatar) {
+          var avatar = document.createElement("img")
+          avatar.id = "PRONOTE_AVATAR"
+          avatar.src = this.userData.avatar
+          user.appendChild(avatar)
+        }
+        var name = document.createElement("div")
+        name.id = "PRONOTE_NAME"
+        //name.textContent = "@bugsounet (Maternelle Sup.)" // for screenshot :)))
+        name.textContent = this.userData.name + (this.config.Header.displayStudentClass ? " (" + this.userData.class + ")" : "")
+        user.appendChild(name)
         wrapper.appendChild(user)
       }
 
