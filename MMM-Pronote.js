@@ -14,13 +14,14 @@ Module.register("MMM-Pronote", {
     password: null,
     cas: 'none',
     account: 'student',
+    studentNumber: 1, // only for parent account
     updateInterval: "1h",
     PronoteKeepAlive: true, // testing
     Header: {
       displayEstablishmentName: true,
       displayStudentName: true,
       displayStudentClass: true,
-      displayAvatar: true
+      displayAvatar: true // ne fonctionne pas avec le compte parent
     },
     Timetables: {
       displayActual: true,
@@ -100,7 +101,7 @@ Module.register("MMM-Pronote", {
       if (this.config.Header.displayEstablishmentName) {
         var icon = document.createElement("div")
         icon.id= "PRONOTE_ICON"
-        icon.textContent = this.userData.establishmentsInfo[0].name
+        icon.textContent = this.userData.establishment
         wrapper.appendChild(icon)
       }
 
@@ -358,6 +359,11 @@ Module.register("MMM-Pronote", {
         if (!this.config.language) this.config.language = config.language
         this.sendSocketNotification('SET_CONFIG', this.config)
         break
+      case "PRONOTE_ACCOUNT":
+        if (this.config.account === "parent" && payload && !isNaN(payload)) {
+          this.sendSocketNotification("SET_ACCOUNT", payload)
+        }
+        break
     }
   },
 
@@ -374,7 +380,9 @@ Module.register("MMM-Pronote", {
           this.updateDom(500)
         break
       case "ERROR":
+        this.init = true
         this.error = payload
+        this.updateDom()
         break
       case "NPM_UPDATE":
         if (payload && payload.length > 0) {
