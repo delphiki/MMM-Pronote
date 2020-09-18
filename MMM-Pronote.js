@@ -93,6 +93,7 @@ Module.register("MMM-Pronote", {
       var error = document.createElement("div")
       error.id = "PRONOTE_ERROR"
       error.innerHTML = this.error ? this.error : "Erreur... Aucune données"
+      this.error = null
       wrapper.appendChild(loading)
       wrapper.appendChild(error)
     } else {

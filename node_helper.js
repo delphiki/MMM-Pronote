@@ -63,7 +63,8 @@ module.exports = NodeHelper.create({
         else {
           /** erreur du code merdique de Pronote-api ? **/
           console.error("[PRONOTE] API Error", err)
-          setTimout(async () => { await this.pronote() } , 3000)
+          this.sendSocketNotification('ERROR', "MMM-Pronote crash !")
+          setTimeout(async () => { await this.pronote() } , 3000)
         }
       }
     }
