@@ -130,8 +130,8 @@ module.exports = NodeHelper.create({
 
       /** convert Dates en HH:MM **/
       Array.from(this.data.timetableOfTheDay, course => {
-        course.fromHour = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
-        course.toHour = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+        course.localizedFrom = new Date(course.from).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
+        course.localizedTo = new Date(course.to).toLocaleTimeString(this.config.language, {hour: '2-digit', minute:'2-digit'})
       })
 
       /** don't display if it's not today **/
@@ -155,7 +155,7 @@ module.exports = NodeHelper.create({
         const timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay)
         this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
       } else {
-        const timetableOfNextDay = await this.session.timetable(this.session.user.students[this.student], FromNextDay,ToNextDay) 
+        const timetableOfNextDay = await this.session.timetable(this.session.user.students[this.student], FromNextDay,ToNextDay)
         this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
       }
 

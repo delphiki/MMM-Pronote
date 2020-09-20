@@ -1,0 +1,61 @@
+<div>
+    {% if config.Header.displayEstablishmentName %}
+        <div id="PRONOTE_ICON">
+            {{ userData.establishment }}
+        </div>
+    {% endif %}
+
+    {% if config.Header.displayStudentName %}
+        <div id="PRONOTE_USER">
+            {% if config.Header.displayAvatar and userData.avatar|length > 0 %}
+                <img id="PRONOTE_AVATAR" src="{{ userData.avatar }}" />
+            {% endif %}
+            {{ userData.name }}
+            {% if config.Header.displayStudentClass %}
+                ({{ userData.class }})
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if config.Timetables.displayActual or config.Timetables.displayNextDay %}
+        <div id="PRONOTE_TIMETABLES">
+            {% ifAsync config.Timetables.displayActual %}
+                <div id="PRONOTE_TIMETABLE_DAY">
+                    <div id="PRONOTE_TEXT_UNDERLINE">
+                        {% if userData.timetableOfTheDay|length > 0 %}
+                            Prochains cours
+                        {% else %}
+                            Plus de cours aujourd'hui !
+                        {% endif %}
+                    </div>
+                    {% set timetable = userData.timetableOfTheDay %}
+                    {% include 'templates/includes/timetable.njk' %}
+                </div>
+            {% endif %}
+
+            {% ifAsync config.Timetables.displayNextDay %}
+                <div id="PRONOTE_TIMETABLE_NEXT">
+                    <div id="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
+                    {% set timetable = userData.timetableOfNextDay.timetable %}
+                    {% include 'templates/includes/timetable.njk' %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% ifAsync config.Averages.display and userData.marks.averages.student %}
+        {% include 'templates/includes/averages.njk' %}
+    {% endif %}
+
+    {% ifAsync config.Marks.display and userData.marks.subjects | length > 0 %}
+        {% include 'templates/includes/marks.njk' %}
+    {% endif %}
+
+    {% ifAsync config.Homeworks.display %}
+        {% include 'templates/includes/homeworks.njk' %}
+    {% endif %}
+
+    {% ifAsync config.Holidays.display %}
+        {% include 'templates/includes/holidays.njk' %}
+    {% endif %}
+</div>

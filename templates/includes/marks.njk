@@ -1,0 +1,25 @@
+<div id="PRONOTE_MARKS">
+    <div id="PRONOTE_TEXT_UNDERLINE">Dernières notes :</div>
+    {% for subject in userData.marks.subjects %}
+        <div id="PRONOTE_SUBJET">
+            <div id="PRONOTE_SUBJECT_VALUE">
+                {{ subject.name }}
+                {% if config.Marks.displayAverage %}
+                    (Moyenne : {{ subject.averages.student }})
+                {% endif %}
+            </div>
+            {% for mark in subject.marks %}
+                <div id="PRONOTE_DETAIL">
+                    <div id="PRONOTE_HOURS">{{ mark.date }}</div>
+                    <div id="PRONOTE_VALUES">{{ mark.title }}</div>
+                    <div id="PRONOTE_VALUES">{{ mark.value }} / {{ mark.scale }}</div>
+                    {% if config.Marks.displayCoeff %}
+                        <div id="PRONOTE_VALUES">
+                            Coeff : {{ mark.coefficient }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

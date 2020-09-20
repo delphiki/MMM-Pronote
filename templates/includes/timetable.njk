@@ -1,0 +1,25 @@
+{% for class in timetable %}
+    {% set cancelled = class.isCancelled or class.isAway %}
+    {% if not cancelled or (cancelled and not class.hasDuplicate) %}
+        <div id="PRONOTE_DISPLAY_TIMETABLE">
+            <div id="PRONOTE_HOURS" {% if cancelled %}class="annuler"{% endif %}>
+                {{ class.localizedFrom }}-{{ class.localizedTo }}
+            </div>
+            <div id="PRONOTE_VALUES" {% if cancelled %}class="annuler"{% endif %}>
+                {{ class.subject }}
+            </div>
+            {% if config.Timetables.displayTeacher and class.teacher | length > 0 %}
+                <div id="PRONOTE_TEACHER">Avec {{ class.teacher }}</div>
+            {% endif %}
+            {% if config.Timetables.displayRoom and class.room | length > 0 %}
+                <div id="PRONOTE_ROOM">[{{ class.room }}]</div>
+            {% endif %}
+            {% if class.isCancelled %}
+                <div>(Cours annulé)</div>
+            {% endif %}
+            {% if class.isAway %}
+                <div>(Absent)</div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}
