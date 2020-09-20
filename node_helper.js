@@ -168,23 +168,31 @@ module.exports = NodeHelper.create({
     if (this.config.Averages.display || this.config.Marks.display) { // notes de l'eleve
       let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
       if (this.config.account == "student") {
-        const marks = await this.session.marks(from,toMarksSearch)
+        const marks = await this.session.marks(from, toMarksSearch)
         this.data["marks"] = marks
       } else {
-        const marks = await this.session.marks(this.session.user.students[this.student], from,toMarksSearch)
+        const marks = await this.session.marks(this.session.user.students[this.student], from, toMarksSearch)
         this.data["marks"] = marks
       }
+
+      Array.from(this.data["marks"], (mark) => {
+        mark.formattedDate = this.formatDate(mark.date, true)
+      })
     }
 
     if (this.config.Homeworks.display) { // liste des devoirs à faire
       let toHomeworksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
-      if (this.config.account == "student") {
-        const homeworks= await this.session.homeworks(from,toHomeworksSearch)
+      if (this.config.account === "student") {
+        const homeworks = await this.session.homeworks(from,toHomeworksSearch)
         this.data["homeworks"] = homeworks
       } else {
-        const homeworks= await this.session.homeworks(this.session.user.students[this.student], from,toHomeworksSearch)
+        const homeworks = await this.session.homeworks(this.session.user.students[this.student], from,toHomeworksSearch)
         this.data["homeworks"] = homeworks
       }
+
+      Array.from(this.data["homeworks"], (homework) => {
+        homework.formattedFor = this.formatDate(homework.for, true)
+      })
     }
 
     if (this.config.Holidays.display) { // Holidays !
@@ -197,6 +205,11 @@ module.exports = NodeHelper.create({
         }
       })
       this.data.holidays = this.cleanArray(this.data.holidays)
+
+      Array.from(this.data.holidays, (holiday) => {
+        holiday.formattedFrom = this.formatDate(holiday.from)
+        holiday.formattedTo = this.formatDate(holiday.to)
+      })
     }
 
     if (this.config.debug) {
@@ -225,6 +238,19 @@ module.exports = NodeHelper.create({
 
     /** Ok ! All info are sended auto-update it ! **/
     this.scheduleUpdate()
+  },
+
+  formatDate: function(date, min = false) {
+    if (!date) {
+      return '';
+    }
+    let options = { day: 'numeric', month: 'numeric' }
+
+    if (!min) {
+      options = {};
+    }
+
+    return (new Date(date)).toLocaleDateString(this.config.language, options)
   },
 
   socketNotificationReceived: function(notification, payload) {

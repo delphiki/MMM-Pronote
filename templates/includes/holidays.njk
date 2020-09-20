@@ -6,10 +6,10 @@
         {% if count < config.Holidays.number %}
             <div id="PRONOTE_DETAIL">
                 <div id="PRONOTE_HOURS">
-                    {% if hodildays.from == holidays.to %}
-                        Le {{ holidays.from }}
+                    {% if holidays.formattedFrom == holidays.formattedTo %}
+                        Le {{ holidays.formattedFrom }} (jour férié)
                     {% else %}
-                        Du {{ holidays.from }} au {{ holidays.to }}
+                        Du {{ holidays.formattedFrom }} au {{ holidays.formattedTo }}
                     {% endif %}
                 </div>
                 <div id="PRONOTE_VALUES">

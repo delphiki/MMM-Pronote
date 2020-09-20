@@ -158,24 +158,6 @@ Module.register("MMM-Pronote", {
     }
   },
 
-  /** Tools **/
-  myGetDate: function (date) {
-     return new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)
-  },
-
-  myDate: function(date, min = false) {
-    var NewDate = null
-    if (!min) NewDate = new Date(date).toLocaleDateString()
-    else {
-      var getDate = new Date(date).getDate()
-      var getMonth = new Date(date).getMonth()+1
-      if (getDate < 10 ) getDate = "0"+getDate
-      if (getMonth <10 ) getMonth = "0"+getMonth
-      NewDate = getDate + "/" + getMonth
-    }
-    return NewDate
-  },
-
   /** convert h m s to ms (good idea !) **/
   getUpdateIntervalMillisecondFromString: function(intervalString) {
    let regexString = new RegExp("^\\d+[smhd]{1}$")

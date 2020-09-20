@@ -10,7 +10,7 @@
             </div>
             {% for mark in subject.marks %}
                 <div id="PRONOTE_DETAIL">
-                    <div id="PRONOTE_HOURS">{{ mark.date }}</div>
+                    <div id="PRONOTE_HOURS">{{ mark.formattedDate }}</div>
                     <div id="PRONOTE_VALUES">{{ mark.title }}</div>
                     <div id="PRONOTE_VALUES">{{ mark.value }} / {{ mark.scale }}</div>
                     {% if config.Marks.displayCoeff %}
