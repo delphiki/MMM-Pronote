@@ -1,0 +1,13 @@
+<div id="PRONOTE_HOMEWORKS">
+    <div id="PRONOTE_TEXT_UNDERLINE">Devoirs à faire:</div>
+
+    {% for homework in userData.homeworks %}
+        <div id="PRONOTE_DETAIL">
+            <div id="PRONOTE_HOURS">{{ homework.formattedFor }}</div>
+            <div id="PRONOTE_HOMEWORKS_VALUES">{{ homework.subject }}</div>
+            {% if config.Homeworks.displayDescription %}
+                <div id="PRONOTE_VALUES_DESCRIPTION">{{ homework.description }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
