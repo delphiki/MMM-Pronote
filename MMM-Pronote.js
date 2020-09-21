@@ -43,7 +43,8 @@ Module.register("MMM-Pronote", {
     Homeworks: {
       display: true,
       searchDays: 7,
-      displayDescription: true
+      displayDescription: true,
+      displayDone: true
     },
     Holidays: {
       display: true,
