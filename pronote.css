@@ -45,11 +45,11 @@
   font-size: xx-large;
 }
 
-#PRONOTE_DISPLAY_TIMETABLE {
+.PRONOTE_DISPLAY_TIMETABLE {
   display:flex;
 }
 
-#PRONOTE_DETAIL {
+.PRONOTE_DETAIL {
   line-height: 1em;
   padding-right: 1em;
   font-size: medium;
@@ -77,14 +77,14 @@
   text-align: center;
 }
 
-#PRONOTE_TIMETABLE_DAY,
-#PRONOTE_TIMETABLE_NEXT {
+.PRONOTE_TIMETABLE_DAY,
+.PRONOTE_TIMETABLE_NEXT {
  padding-bottom: 10px;
 }
 
-#PRONOTE_AV_STUDENT,
-#PRONOTE_VALUES,
-#PRONOTE_HOURS {
+.PRONOTE_AV_STUDENT,
+.PRONOTE_VALUES,
+.PRONOTE_HOURS {
   margin-right: 10px;
 }
 
@@ -92,26 +92,31 @@
   padding-bottom: 10px;
 }
 
-#PRONOTE_TEXT_UNDERLINE {
+.PRONOTE_TEXT_UNDERLINE {
   padding-bottom: 12px;
   text-decoration: underline;
 }
 
-#PRONOTE_SUBJECT_VALUE {
+.PRONOTE_SUBJECT_VALUE {
   padding-bottom: 5px;
 }
 
-#PRONOTE_TEACHER,
-#PRONOTE_ROOM,
-#PRONOTE_CANCEL {
+.PRONOTE_TEACHER,
+.PRONOTE_ROOM,
+.PRONOTE_CANCEL {
   margin-right: 5px
 }
 
-#PRONOTE_VALUES_DESCRIPTION {
+.PRONOTE_VALUES_DESCRIPTION {
   width: 250px;
 }
 
-#PRONOTE_HOMEWORKS_VALUES {
+.PRONOTE_HOMEWORKS_DONE {
+  width:40px;
+  text-align: center;
+}
+
+.PRONOTE_HOMEWORKS_VALUES {
   width: 100px;
   margin-right: 10px;
   overflow: hidden;

@@ -21,7 +21,7 @@
         <div id="PRONOTE_TIMETABLES">
             {% ifAsync config.Timetables.displayActual %}
                 <div id="PRONOTE_TIMETABLE_DAY">
-                    <div id="PRONOTE_TEXT_UNDERLINE">
+                    <div class="PRONOTE_TEXT_UNDERLINE">
                         {% if userData.timetableOfTheDay|length > 0 %}
                             Prochains cours
                         {% else %}
@@ -35,7 +35,7 @@
 
             {% ifAsync config.Timetables.displayNextDay %}
                 <div id="PRONOTE_TIMETABLE_NEXT">
-                    <div id="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
+                    <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
                     {% set timetable = userData.timetableOfNextDay.timetable %}
                     {% include 'templates/includes/timetable.njk' %}
                 </div>
