@@ -191,7 +191,7 @@ module.exports = NodeHelper.create({
       }
 
       Array.from(this.data["homeworks"], (homework) => {
-        homework.formattedFor = this.formatDate(homework.for, true)
+        homework.formattedFor = (new Date(homework.for)).toLocaleDateString(this.config.language, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
       })
     }
 

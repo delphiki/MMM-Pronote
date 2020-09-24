@@ -1,10 +1,16 @@
 <div id="PRONOTE_HOMEWORKS">
     <div class="PRONOTE_TEXT_UNDERLINE">Devoirs {% if not config.Homeworks.displayDone %}à faire{% endif %} :</div>
 
+    {% set homeworkDate = null %}
     {% for homework in userData.homeworks %}
+        {% if homeworkDate !== homework.formattedFor %}
+            <div class="PRONOTE_HOMEWORKS_DATE">
+                <span>pour {{ homework.formattedFor }}</span>
+            </div>
+            {% set homeworkDate = homework.formattedFor %}
+        {% endif %}
         {% if (homework.done and config.Homeworks.displayDone) or not homework.done  %}
             <div class="PRONOTE_DETAIL">
-                <div class="PRONOTE_HOURS">{{ homework.formattedFor }}</div>
                 {% if config.Homeworks.displayDone %}
                     <div class="PRONOTE_HOMEWORKS_DONE">{% if homework.done %}✓{% endif %}</div>
                 {% endif %}
