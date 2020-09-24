@@ -143,3 +143,7 @@
   font-size: large;
 }
 .cancelled {text-decoration:line-through;}
+
+.highlight {
+  color: white;
+}

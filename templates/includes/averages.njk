@@ -1,7 +1,7 @@
 <div id="PRONOTE_AVERAGES">
     {% if config.Averages.displayStudent %}
         <div class="PRONOTE_AV_STUDENT">
-            Moyenne générale : {{ userData.marks.averages.student }}
+            Moyenne générale : <span class="highlight">{{ userData.marks.averages.student }}</span>
         </div>
     {% endif %}
     {% if config.Averages.displayClass %}

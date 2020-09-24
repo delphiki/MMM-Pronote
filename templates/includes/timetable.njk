@@ -5,14 +5,14 @@
             <div class="PRONOTE_HOURS" {% if cancelled %}class="cancelled"{% endif %}>
                 {{ class.localizedFrom }}-{{ class.localizedTo }}
             </div>
-            <div class="PRONOTE_VALUES" {% if cancelled %}class="cancelled"{% endif %}>
+            <div class="PRONOTE_VALUES highlight" {% if cancelled %}class="cancelled"{% endif %}>
                 {{ class.subject }}
             </div>
             {% if config.Timetables.displayTeacher and class.teacher | length > 0 %}
-                <div id="PRONOTE_TEACHER">Avec {{ class.teacher }}</div>
+                <div class="PRONOTE_TEACHER">Avec {{ class.teacher }}</div>
             {% endif %}
             {% if config.Timetables.displayRoom and class.room | length > 0 %}
-                <div id="PRONOTE_ROOM">[{{ class.room }}]</div>
+                <div class="PRONOTE_ROOM">[{{ class.room }}]</div>
             {% endif %}
             {% if class.isCancelled %}
                 <div>(Cours annulé)</div>
