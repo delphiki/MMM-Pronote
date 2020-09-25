@@ -175,8 +175,10 @@ module.exports = NodeHelper.create({
         this.data["marks"] = marks
       }
 
-      Array.from(this.data["marks"], (mark) => {
-        mark.formattedDate = this.formatDate(mark.date, true)
+      Array.from(this.data.marks.subjects, (subject) => {
+        Array.from(subject.marks, (mark) => {
+          mark.formattedDate = this.formatDate(mark.date, true)
+        })
       })
     }
 

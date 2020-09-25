@@ -77,8 +77,8 @@
   text-align: center;
 }
 
-.PRONOTE_TIMETABLE_DAY,
-.PRONOTE_TIMETABLE_NEXT {
+#PRONOTE_TIMETABLE_DAY,
+#PRONOTE_TIMETABLE_NEXT {
   padding-bottom: 10px;
 }
 
@@ -98,7 +98,7 @@
 }
 
 .PRONOTE_SUBJECT_VALUE {
-  padding-bottom: 5px;
+  padding: 5px 0;
 }
 
 .PRONOTE_TEACHER,

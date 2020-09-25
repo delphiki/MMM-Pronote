@@ -1,7 +1,7 @@
 <div id="PRONOTE_MARKS">
     <div class="PRONOTE_TEXT_UNDERLINE">Dernières notes :</div>
     {% for subject in userData.marks.subjects %}
-        <div class="PRONOTE_SUBJET">
+        <div class="PRONOTE_SUBJECT">
             <div class="PRONOTE_SUBJECT_VALUE">
                 {{ subject.name }}
                 {% if config.Marks.displayAverage %}
