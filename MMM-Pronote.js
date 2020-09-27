@@ -103,7 +103,7 @@ Module.register("MMM-Pronote", {
 
   updateData: function(data) {
     this.userData = data
-    if (!this.userData.name) {
+    if (Object.keys(this.userData).length === 0) {
       this.log ("Error... no data!")
       this.error = "Erreur... Aucune données"
       return
