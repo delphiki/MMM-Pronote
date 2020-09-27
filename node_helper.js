@@ -268,16 +268,20 @@ module.exports = NodeHelper.create({
 
   /** update process **/
   scheduleUpdate: function(delay) {
-   let nextLoad = this.updateIntervalMilliseconds
-   if (typeof delay !== "undefined" && delay >= 0) {
-     nextLoad = delay
-   }
-   clearInterval(this.interval)
-   this.interval = setInterval(async () => {
-     if (this.config.PronoteKeepAlive) await this.fetchData()
-     else await this.pronote()
-     log("Pronote data updated.")
-   }, nextLoad)
+    if (!this.config.PronoteKeepAlive) {
+      this.session.logout()
+      log("Pronote Logout.")
+    }
+    let nextLoad = this.updateIntervalMilliseconds
+    if (typeof delay !== "undefined" && delay >= 0) {
+      nextLoad = delay
+    }
+    clearInterval(this.interval)
+    this.interval = setInterval(async () => {
+      if (this.config.PronoteKeepAlive) await this.fetchData()
+      else await this.pronote()
+      log("Pronote data updated.")
+    }, nextLoad)
   },
 
   /** swith account... Parent only **/
