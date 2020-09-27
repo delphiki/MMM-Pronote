@@ -175,8 +175,10 @@ module.exports = NodeHelper.create({
         this.data["marks"] = marks
       }
 
-      Array.from(this.data["marks"], (mark) => {
-        mark.formattedDate = this.formatDate(mark.date, true)
+      Array.from(this.data.marks.subjects, (subject) => {
+        Array.from(subject.marks, (mark) => {
+          mark.formattedDate = this.formatDate(mark.date, true)
+        })
       })
     }
 
@@ -191,7 +193,7 @@ module.exports = NodeHelper.create({
       }
 
       Array.from(this.data["homeworks"], (homework) => {
-        homework.formattedFor = this.formatDate(homework.for, true)
+        homework.formattedFor = (new Date(homework.for)).toLocaleDateString(this.config.language, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
       })
     }
 
@@ -266,16 +268,20 @@ module.exports = NodeHelper.create({
 
   /** update process **/
   scheduleUpdate: function(delay) {
-   let nextLoad = this.updateIntervalMilliseconds
-   if (typeof delay !== "undefined" && delay >= 0) {
-     nextLoad = delay
-   }
-   clearInterval(this.interval)
-   this.interval = setInterval(async () => {
-     if (this.config.PronoteKeepAlive) await this.fetchData()
-     else await this.pronote()
-     log("Pronote data updated.")
-   }, nextLoad)
+    if (!this.config.PronoteKeepAlive) {
+      this.session.logout()
+      log("Pronote Logout.")
+    }
+    let nextLoad = this.updateIntervalMilliseconds
+    if (typeof delay !== "undefined" && delay >= 0) {
+      nextLoad = delay
+    }
+    clearInterval(this.interval)
+    this.interval = setInterval(async () => {
+      if (this.config.PronoteKeepAlive) await this.fetchData()
+      else await this.pronote()
+      log("Pronote data updated.")
+    }, nextLoad)
   },
 
   /** swith account... Parent only **/

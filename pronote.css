@@ -77,9 +77,9 @@
   text-align: center;
 }
 
-.PRONOTE_TIMETABLE_DAY,
-.PRONOTE_TIMETABLE_NEXT {
- padding-bottom: 10px;
+#PRONOTE_TIMETABLE_DAY,
+#PRONOTE_TIMETABLE_NEXT {
+  padding-bottom: 10px;
 }
 
 .PRONOTE_AV_STUDENT,
@@ -98,7 +98,7 @@
 }
 
 .PRONOTE_SUBJECT_VALUE {
-  padding-bottom: 5px;
+  padding: 5px 0;
 }
 
 .PRONOTE_TEACHER,
@@ -111,8 +111,22 @@
   width: 250px;
 }
 
+.PRONOTE_HOMEWORKS_DATE {
+  text-align: left;
+  margin: 15px 0;
+}
+
+.PRONOTE_HOMEWORKS_DATE span {
+  border-top-right-radius: 1em;
+  border-bottom-right-radius: 1em;
+  background: rgb(0,0,0);
+  background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(170,170,170,0.8) 20%);
+  color: black;
+  padding: 5px 10px 5px 25px;
+}
+
 .PRONOTE_HOMEWORKS_DONE {
-  width:40px;
+  width:30px;
   text-align: center;
 }
 
@@ -129,3 +143,7 @@
   font-size: large;
 }
 .cancelled {text-decoration:line-through;}
+
+.highlight {
+  color: white;
+}

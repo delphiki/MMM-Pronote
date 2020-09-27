@@ -16,7 +16,7 @@ Module.register("MMM-Pronote", {
     account: 'student',
     studentNumber: 1, // only for parent account
     updateInterval: "1h",
-    PronoteKeepAlive: true, // testing
+    PronoteKeepAlive: false, // testing
     Header: {
       displayEstablishmentName: true,
       displayStudentName: true,
@@ -88,11 +88,10 @@ Module.register("MMM-Pronote", {
       return {
         loading: this.translate("LOADING")
       }
-    } else if(Object.keys(this.userData).length === 0) {
-      let error = this.error ? this.error : "Erreur... Aucune données";
-      this.error = null;
+    } else if (this.error) {
+      console.log("[PRONOTE] Error:", this.error)
       return {
-        error: error ? error : "Erreur... Aucune données"
+        error: this.error
       }
     } else {
       return {
@@ -104,8 +103,11 @@ Module.register("MMM-Pronote", {
 
   updateData: function(data) {
     this.userData = data
-    if (!this.userData.name) return this.log ("Error... no data!")
-
+    if (!this.userData.name) {
+      this.log ("Error... no data!")
+      this.error = "Erreur... Aucune données"
+      return
+    }
     this.log("data:", this.userData)
     if (this.init) this.updateDom(500)
   },
@@ -128,13 +130,18 @@ Module.register("MMM-Pronote", {
     switch (notification) {
       case "PRONOTE_UPDATED":
         if (payload) {
+          this.error = null
           this.updateData(payload)
           this.sendNotification("PRONOTE_DATA", payload)
+        }
+        else {
+          this.error = "Erreur... Aucune données"
+          this.updateDom()
         }
         break
       case "INITIALIZED":
           this.init = true
-          this.updateDom(500)
+          if (!this.error) this.updateDom(500)
         break
       case "ERROR":
         this.init = true
