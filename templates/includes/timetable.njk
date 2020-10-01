@@ -14,7 +14,9 @@
                 {% endif %}
             {% endif %}
             {% if config.Timetables.displayRoom and class.room | length > 0 %}
-                <div class="PRONOTE_ROOM">[{{ class.room }}]</div>
+                {% if not cancelled %}
+                  <div class="PRONOTE_ROOM">[{{ class.room }}]</div>
+                {% endif %}
             {% endif %}
             {% if class.isCancelled %}
                 <div>(Cours annulé)</div>
