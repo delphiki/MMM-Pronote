@@ -166,20 +166,39 @@ module.exports = NodeHelper.create({
     }
 
     if (this.config.Averages.display || this.config.Marks.display) { // notes de l'eleve
-      let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Homeworks.searchDays,0,0,0)
+      let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Marks.searchDays,0,0,0)
       if (this.config.account == "student") {
         const marks = await this.session.marks(from, toMarksSearch)
         this.data["marks"] = marks
       } else {
-        const marks = await this.session.marks(this.session.user.students[this.student], from, toMarksSearch)
+        const marks = await this.session.marks(this.session.user.students[this.student], from) // don't work !? , toMarksSearch)
         this.data["marks"] = marks
       }
 
-      Array.from(this.data.marks.subjects, (subject) => {
-        Array.from(subject.marks, (mark) => {
+      /** Delete old marks ... **/
+      Array.from(this.data.marks.subjects, (subject,nbs) => {
+        Array.from(subject.marks, (mark,nbm) => {
+          var ToDate = this.addDays(mark.date,7)
           mark.formattedDate = this.formatDate(mark.date, true)
+          if (mark.date < toMarksSearch) {
+            delete this.data.marks.subjects[nbs].marks[nbm]
+          }
         })
       })
+
+      /** Clean Array ...**/
+      Array.from(this.data.marks.subjects, (subject,nbs) => {
+        this.data.marks.subjects[nbs].marks = this.cleanArray(this.data.marks.subjects[nbs].marks)
+        if (subject.marks.length == 0) { // delete subject is no marks
+          delete this.data.marks.subjects[nbs]
+        }
+      })
+
+     /** Clean subjects if no marks ... **/
+      Array.from(this.data.marks.subjects, (subject) => {
+        this.data.marks.subjects = this.cleanArray(this.data.marks.subjects)
+      })
+
     }
 
     if (this.config.Homeworks.display) { // liste des devoirs à faire
@@ -339,5 +358,11 @@ module.exports = NodeHelper.create({
       }
     }
     return newArray;
-  }
+  },
+
+  addDays: function(date, days) {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
 });
