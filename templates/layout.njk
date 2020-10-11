@@ -19,26 +19,31 @@
 
     {% if config.Timetables.displayActual or config.Timetables.displayNextDay %}
         <div id="PRONOTE_TIMETABLES">
-            {% ifAsync config.Timetables.displayActual %}
-                <div id="PRONOTE_TIMETABLE_DAY">
-                    <div class="PRONOTE_TEXT_UNDERLINE">
-                        {% if userData.timetableOfTheDay|length > 0 %}
-                            Prochains cours
-                        {% else %}
-                            Plus de cours aujourd'hui !
-                        {% endif %}
-                    </div>
-                    {% set timetable = userData.timetableOfTheDay %}
-                    {% include 'templates/includes/timetable.njk' %}
-                </div>
+            {% if userData.timetableOfTheDay|length > 0 %}
+              {% ifAsync config.Timetables.displayActual %}
+                  <div id="PRONOTE_TIMETABLE_DAY">
+                      <div class="PRONOTE_TEXT_UNDERLINE">
+                              Prochains cours
+                      </div>
+                      {% set timetable = userData.timetableOfTheDay %}
+                      {% include 'templates/includes/timetable.njk' %}
+                  </div>
+              {% endif %}
+            {% else %}
+              {% ifAsync config.Timetables.displayNextDay %}
+                  <div id="PRONOTE_TIMETABLE_NEXT">
+                      <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
+                      {% set timetable = userData.timetableOfNextDay.timetable %}
+                      {% include 'templates/includes/timetable.njk' %}
+                  </div>
+              {% endif %}
             {% endif %}
-
-            {% ifAsync config.Timetables.displayNextDay %}
-                <div id="PRONOTE_TIMETABLE_NEXT">
-                    <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
-                    {% set timetable = userData.timetableOfNextDay.timetable %}
-                    {% include 'templates/includes/timetable.njk' %}
-                </div>
+            {% ifAsync not config.Timetables.displayNextDay and userData.timetableOfTheDay|length == 0 %}
+                  <div id="PRONOTE_TIMETABLE_DAY">
+                      <div class="PRONOTE_TEXT_UNDERLINE">
+                              Plus de cours aujourd'hui !
+                      </div>
+                  </div>
             {% endif %}
         </div>
     {% endif %}
