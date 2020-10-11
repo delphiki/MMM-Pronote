@@ -5,7 +5,7 @@
             <div class="PRONOTE_SUBJECT_VALUE">
                 {{ subject.name }}
                 {% if config.Marks.displayAverage %}
-                    (Moyenne : {{ subject.averages.student }})
+                    (Moyenne : {{ subject.averages.student.toFixed(2) }})
                 {% endif %}
             </div>
             {% for mark in subject.marks %}

@@ -17,11 +17,12 @@ Module.register("MMM-Pronote", {
     studentNumber: 1, // only for parent account
     updateInterval: "1h",
     PronoteKeepAlive: false, // testing
+    PeriodType: "semester",
     Header: {
       displayEstablishmentName: true,
       displayStudentName: true,
       displayStudentClass: true,
-      displayAvatar: true // ne fonctionne pas avec le compte parent
+      displayAvatar: true // ne fonctionne pas avec le compte parent et uniquement avec PronoteKeepAlive sur true
     },
     Timetables: {
       displayActual: true,
@@ -43,6 +44,7 @@ Module.register("MMM-Pronote", {
     Homeworks: {
       display: true,
       searchDays: 7,
+      numberDays: 1,
       displayDescription: true,
       displayDone: true
     },
