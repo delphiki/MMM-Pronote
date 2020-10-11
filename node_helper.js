@@ -171,34 +171,15 @@ module.exports = NodeHelper.create({
         const marks = await this.session.marks(from, toMarksSearch)
         this.data["marks"] = marks
       } else {
-        const marks = await this.session.marks(this.session.user.students[this.student], from) // don't work !? , toMarksSearch)
+        const marks = await this.session.marks(this.session.user.students[this.student], null, this.config.PeriodType)
         this.data["marks"] = marks
       }
 
-      /** Delete old marks ... **/
-      Array.from(this.data.marks.subjects, (subject,nbs) => {
-        Array.from(subject.marks, (mark,nbm) => {
-          var ToDate = this.addDays(mark.date,7)
-          mark.formattedDate = this.formatDate(mark.date, true)
-          if (mark.date < toMarksSearch) {
-            delete this.data.marks.subjects[nbs].marks[nbm]
-          }
-        })
+      this.data.marks.subjects.filter(subject => {
+        subject.marks = subject.marks.filter(mark => (mark.formattedDate = this.formatDate(mark.date, true)) && mark.date >= toMarksSearch)
       })
 
-      /** Clean Array ...**/
-      Array.from(this.data.marks.subjects, (subject,nbs) => {
-        this.data.marks.subjects[nbs].marks = this.cleanArray(this.data.marks.subjects[nbs].marks)
-        if (subject.marks.length == 0) { // delete subject is no marks
-          delete this.data.marks.subjects[nbs]
-        }
-      })
-
-     /** Clean subjects if no marks ... **/
-      Array.from(this.data.marks.subjects, (subject) => {
-        this.data.marks.subjects = this.cleanArray(this.data.marks.subjects)
-      })
-
+      this.data.marks.subjects = this.data.marks.subjects.filter(subject => subject.marks.length > 0)
     }
 
     if (this.config.Homeworks.display) { // liste des devoirs à faire
@@ -214,18 +195,16 @@ module.exports = NodeHelper.create({
       Array.from(this.data["homeworks"], (homework) => {
         homework.formattedFor = (new Date(homework.for)).toLocaleDateString(this.config.language, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
       })
+
+      /** display only number of day needed **/
+      var fromStartTable= this.data.homeworks.length ? this.data.homeworks[0].for : fromNow
+      var toHomeworksDisplayDay = new Date(fromStartTable.getFullYear(),fromStartTable.getMonth(),fromStartTable.getDate() + this.config.Homeworks.numberDays,0,0,0)
+      this.data.homeworks = this.data.homeworks.filter(homework => homework.for < toHomeworksDisplayDay)
     }
 
     if (this.config.Holidays.display) { // Holidays !
       this.data["holidays"] = this.session.params.publicHolidays
-      /** don't display holidays if finish ! **/
-      this.data.holidays.forEach((Holidays,nb) => {
-        if (fromNow > Holidays.to) {
-          log("Delete Holidays:", Holidays)
-          delete this.data.holidays[nb]
-        }
-      })
-      this.data.holidays = this.cleanArray(this.data.holidays)
+      this.data.holidays = this.data.holidays.filter(Holidays => fromNow < Holidays.to)
 
       Array.from(this.data.holidays, (holiday) => {
         holiday.formattedFrom = this.formatDate(holiday.from)
@@ -237,14 +216,15 @@ module.exports = NodeHelper.create({
       //this.data["USER"] = this.session.user
       //this.data["PARAMS"] = this.session.params
       // reserved for later ?
-      /*
-      const infos = await this.session.infos()
-      const menu = await this.session.menu()
-      const evaluations = await this.session.evaluations()
-      const contents = await this.session.contents()
-      const absences = await this.session.absences()
-      let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() + this.config.Absences.searchDays,0,0,0)
 
+      //const infos = await this.session.infos()
+      //const menu = await this.session.menu()
+
+      //const contents = await this.session.contents()
+      /*
+      let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - 7,0,0,0)
+      const absences = await this.session.absences(this.session.user.students[this.student], null, toAbsencesSearch, from , this.config.PeriodType)
+      const evaluations = await this.session.evaluations(this.session.user.students[this.student], null, this.config.PeriodType)
       this.data["infos"] = infos // info Prof/Etablisement -> eleves ?
       this.data["menu"] = menu // le menu de la cantine
       this.data["evaluations"] = evaluations // les resulat des evals
@@ -349,17 +329,7 @@ module.exports = NodeHelper.create({
     return updateIntervalMillisecond
   },
 
-  /** Delete empty value of an Array **/
-  cleanArray: function(actual) {
-    var newArray = new Array();
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i]) {
-        newArray.push(actual[i]);
-      }
-    }
-    return newArray;
-  },
-
+  /** Add X day to the date **/
   addDays: function(date, days) {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
