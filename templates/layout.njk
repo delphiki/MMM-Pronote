@@ -64,6 +64,14 @@
         {% include 'templates/includes/homeworks.njk' %}
     {% endif %}
 
+    {% ifAsync config.Absences.display %}
+        {% include 'templates/includes/absences.njk' %}
+    {% endif %}
+
+    {% ifAsync config.Delays.display %}
+        {% include 'templates/includes/delays.njk' %}
+    {% endif %}
+
     {% ifAsync config.Holidays.display %}
         {% include 'templates/includes/holidays.njk' %}
     {% endif %}
