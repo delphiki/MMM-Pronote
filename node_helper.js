@@ -249,14 +249,14 @@ module.exports = NodeHelper.create({
 
       this.data["absences"] = absencesValue["absences"]
       this.localizedDate(this.data["absences"], {month: "numeric", day: "numeric", hour: '2-digit', minute:'2-digit'})
-      this.data.absences = this.data.absences.filter(absences => absences.from > toAbsencesSearch)
+      this.data.absences = this.data.absences.filter(absences => absences.from > toAbsencesSearch).reverse()
 
       this.data["delays"] = absencesValue["delays"]
       let toDelaySearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Delays.searchDays,0,0,0)
       Array.from(this.data["delays"], (course) => {
         course.localizedDate = (new Date(course.date)).toLocaleTimeString(this.config.language, {month: "short", day: "numeric", hour: '2-digit', minute:'2-digit'})
       })
-      this.data.delays = this.data.delays.filter(delays => delays.date > toDelaySearch)
+      this.data.delays = this.data.delays.filter(delays => delays.date > toDelaySearch).reverse()
 
       /*
       const evaluations = await this.session.evaluations(this.session.user.students[this.student], null, this.config.PeriodType)
