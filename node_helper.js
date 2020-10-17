@@ -231,16 +231,7 @@ module.exports = NodeHelper.create({
       this.data.homeworks = this.data.homeworks.filter(homework => homework.for < toHomeworksDisplayDay)
     }
 
-    if (this.config.debug) {
-      //this.data["USER"] = this.session.user
-      //this.data["PARAMS"] = this.session.params
-      // reserved for later ?
-
-      //const infos = await this.session.infos()
-      //const menu = await this.session.menu()
-
-      //const contents = await this.session.contents()
-
+    if (this.config.Absences.display || this.config.Delays.display) {
       let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Absences.searchDays,0,0,0)
       //use my new feature (search by trimester // semester)
       var absencesValue = null
@@ -257,6 +248,17 @@ module.exports = NodeHelper.create({
         course.localizedDate = (new Date(course.date)).toLocaleTimeString(this.config.language, {month: "short", day: "numeric", hour: '2-digit', minute:'2-digit'})
       })
       this.data.delays = this.data.delays.filter(delays => delays.date > toDelaySearch).reverse()
+    }
+
+    if (this.config.debug) {
+      //this.data["USER"] = this.session.user
+      //this.data["PARAMS"] = this.session.params
+      // reserved for later ?
+
+      //const infos = await this.session.infos()
+      //const menu = await this.session.menu()
+
+      //const contents = await this.session.contents()
 
       /*
       const evaluations = await this.session.evaluations(this.session.user.students[this.student], null, this.config.PeriodType)
