@@ -257,7 +257,6 @@ module.exports = NodeHelper.create({
 
       //const infos = await this.session.infos()
       //const menu = await this.session.menu()
-
       //const contents = await this.session.contents()
 
       /*
@@ -266,7 +265,6 @@ module.exports = NodeHelper.create({
       this.data["menu"] = menu // le menu de la cantine
       this.data["evaluations"] = evaluations // les resulat des evals
       this.data["contents"] = contents // je sais pas trop pour le moment c'est vide ... (peut-etre les actus ?)
-      this.data["absences"] = absences // les absences ...
       */
       //log("Data:", absences, delays) // log as you want ;)
     }
