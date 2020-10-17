@@ -1,0 +1,20 @@
+{% if userData.delays|length > 0 %}
+  <div id="PRONOTE_DELAYS">
+      <div class="PRONOTE_TEXT_UNDERLINE">Retards :</div>
+
+      {% set count = 0 %}
+      {% for delays in userData.delays %}
+          {% if count < config.Delays.number %}
+              <div class="PRONOTE_DETAIL">
+                  <div class="PRONOTE_HOURS">
+                      Le {{ delays.localizedDate }} ({{ delays.minutesMissed }} Minutes)
+                  </div>
+                  <div class="PRONOTE_VALUES">
+                      {{ delays.reason }}
+                  </div>
+              </div>
+          {% endif %}
+          {% set count = count + 1 %}
+      {% endfor %}
+  </div>
+{% endif %}

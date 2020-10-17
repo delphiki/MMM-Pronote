@@ -50,6 +50,16 @@ Module.register("MMM-Pronote", {
       displayDescription: true,
       displayDone: true
     },
+    Absences: {
+      display: true,
+      searchDays: 7,
+      number: 1
+    },
+    Delays: {
+      display: true,
+      searchDays: 7,
+      number: 1
+    },
     Holidays: {
       display: true,
       number: 3
