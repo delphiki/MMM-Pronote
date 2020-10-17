@@ -97,6 +97,10 @@
   text-decoration: underline;
 }
 
+.PRONOTE_SUBJECT {
+  border-bottom: dotted 2px #222;
+}
+
 .PRONOTE_SUBJECT_VALUE {
   padding: 5px 0;
 }

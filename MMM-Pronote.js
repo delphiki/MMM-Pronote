@@ -7,6 +7,8 @@
  */
 
 Module.register("MMM-Pronote", {
+
+  requiresVersion: "2.13.0",
   defaults: {
     debug: true, // set it to false if you want no debug in console
     url: null,
@@ -66,10 +68,6 @@ Module.register("MMM-Pronote", {
    this.error = null
    if (this.config.debug) this.log = (...args) => { console.log("[PRONOTE]", ...args) }
    else this.log = (...args) => { /* do nothing */ }
-  },
-
-  getScripts: function() {
-    return ["configMerge.min.js"]
   },
 
   getStyles: function() {

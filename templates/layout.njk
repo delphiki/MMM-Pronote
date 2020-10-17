@@ -32,9 +32,13 @@
             {% else %}
               {% ifAsync config.Timetables.displayNextDay %}
                   <div id="PRONOTE_TIMETABLE_NEXT">
-                      <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
-                      {% set timetable = userData.timetableOfNextDay.timetable %}
-                      {% include 'templates/includes/timetable.njk' %}
+                      {% if userData.isHolidays.active %}
+                        <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.isHolidays.name }}</div>
+                      {% else %}
+                        <div class="PRONOTE_TEXT_UNDERLINE">{{ userData.timetableOfNextDay.timetableDay }}</div>
+                        {% set timetable = userData.timetableOfNextDay.timetable %}
+                        {% include 'templates/includes/timetable.njk' %}
+                      {% endif %}
                   </div>
               {% endif %}
             {% endif %}
