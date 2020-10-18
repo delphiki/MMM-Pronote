@@ -367,6 +367,7 @@ module.exports = NodeHelper.create({
     log("Switch Account:", accountNumber)
     clearTimeout(this.timeLogout)
     clearInterval(this.interval)
+    this.sendSocketNotification("ACCOUNT_CHANGE")
     this.config.Account = accountNumber
     this.getAccount()
   },
@@ -411,8 +412,8 @@ module.exports = NodeHelper.create({
 
   /** Add X day to the date **/
   addDays: function(date, days) {
-  var result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
 });
