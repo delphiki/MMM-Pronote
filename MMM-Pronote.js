@@ -176,6 +176,12 @@ Module.register("MMM-Pronote", {
         this.error = payload
         this.updateDom()
         break
+      case "ACCOUNT_CHANGE":
+        this.userData = {}
+        this.error = null
+        this.init = false
+        this.updateDom()
+        break
       case "NPM_UPDATE":
         if (payload && payload.length > 0) {
           if (this.config.NPMCheck.useAlert) {
@@ -227,4 +233,26 @@ Module.register("MMM-Pronote", {
     }
     return updateIntervalMillisecond
   },
+
+  /** TelegramBot pronote command **/
+  getCommands: function(commander) {
+    commander.add({
+      command: "pronote",
+      description: "Change le compte de pronote",
+      callback: "pronote"
+    })
+  },
+
+  pronote: function(command,handler) {
+    if (handler.args) {
+      var args = handler.args.split(" ")
+      if (!isNaN(args[0])) {
+          if (args[0] == 0 || (args[0] > this.config.Accounts.length)) return handler.reply("TEXT", "Compte non trouvé: " + args[0])
+          handler.reply("TEXT", "Je change le compte pronote vers le numéro " + args[0])
+          this.sendSocketNotification("SET_ACCOUNT", args[0])
+      }
+      else handler.reply("TEXT", args[0] + " n'est pas un numéro du compte valide")
+    }
+    else handler.reply("TEXT", "Merci de spécifier le numéro du compte")
+  }
 });
