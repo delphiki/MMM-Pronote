@@ -11,14 +11,28 @@ Module.register("MMM-Pronote", {
   requiresVersion: "2.13.0",
   defaults: {
     debug: true, // set it to false if you want no debug in console
+    Account: 0,
+    Accounts: [
+      {
+        url: null,
+        username: null,
+        password: null,
+        cas: 'none',
+        account: 'student',
+        studentNumber: 1, // only for parent account
+      }
+    ],
+
+    /** it will be deprecied soon **/
     url: null,
     username: null,
     password: null,
     cas: 'none',
     account: 'student',
-    studentNumber: 1, // only for parent account
-    updateInterval: "1h",
-    PronoteKeepAlive: false, // testing
+    studentNumber: 1,
+    /**********/
+
+    updateInterval: "10m",
     PeriodType: "semester",
     Header: {
       displayEstablishmentName: true,
@@ -93,6 +107,7 @@ Module.register("MMM-Pronote", {
       return "templates/layout.njk"
     }
   },
+
   getTemplateData: function () {
     if (!this.init) {
       return {
@@ -129,7 +144,7 @@ Module.register("MMM-Pronote", {
         this.sendSocketNotification('SET_CONFIG', this.config)
         break
       case "PRONOTE_ACCOUNT":
-        if (this.config.account === "parent" && payload && !isNaN(payload)) {
+        if (!isNaN(payload)) {
           this.sendSocketNotification("SET_ACCOUNT", payload)
         }
         break
@@ -145,6 +160,7 @@ Module.register("MMM-Pronote", {
           this.sendNotification("PRONOTE_DATA", payload)
         }
         else {
+          this.userData = {}
           this.error = "Erreur... Aucune données"
           this.updateDom()
         }
@@ -155,6 +171,7 @@ Module.register("MMM-Pronote", {
         break
       case "ERROR":
         this.init = true
+        this.userData = {}
         this.error = payload
         this.updateDom()
         break

@@ -9,22 +9,18 @@ module.exports = NodeHelper.create({
     /** initialize all value there **/
     this.session = null
     this.interval = null
+    this.timeLogout = null
     this.Checker = null
     this.data = {}
     this.student = 0
+    this.account = {}
   },
 
-  initialize: async function(config) {
+  initialize: function(config) {
     console.log("[PRONOTE] MMM-Pronote Version:", require('./package.json').version)
     this.config = config
     if (this.config.debug) log = (...args) => { console.log("[PRONOTE]", ...args) }
     this.updateIntervalMilliseconds = this.getUpdateIntervalMillisecondFromString(this.config.updateInterval)
-    console.log("[PRONOTE] Number of CAS available:", pronote.casList.length)
-    log("CAS List:", pronote.casList)
-    if (!this.config.username || !this.config.password) return this.sendSocketNotification('ERROR', "Les champs user et password doivent être remplis !")
-    if (this.config.account === "parent" && (!this.config.studentNumber || isNaN(this.config.studentNumber))) return this.sendSocketNotification('ERROR', "studentNumber ne peux pas être égale 0 !")
-    await this.pronote()
-    this.sendSocketNotification("INITIALIZED")
     /** check if update of npm Library needed **/
     if (this.config.NPMCheck.useChecker) {
       var cfg = {
@@ -35,13 +31,54 @@ module.exports = NodeHelper.create({
       }
       this.Checker= new npmCheck(cfg, update => { this.sendSocketNotification("NPM_UPDATE", update)} )
     }
+    console.log("[PRONOTE] Number of CAS available:", pronote.casList.length)
+    log("CAS List:", pronote.casList)
+    if (this.config.Account > 0) this.getAccount()
+    else this.simpleAccount()
+  },
+
+  /** old configuration type **/
+  simpleAccount: async function() {
+    if (!this.config.username) return this.sendSocketNotification('ERROR', "Le champ user doit être remplis !")
+    if (!this.config.password) return this.sendSocketNotification('ERROR', "Le champ password doit être remplis !")
+    if (!this.config.url) return this.sendSocketNotification('ERROR', "Le champ url doit être remplis !")
+    if (this.config.account !== "student" && this.config.account !== "parent" ) return this.sendSocketNotification('ERROR', "Le champ account est incorrect (student ou parent)")
+    if (this.config.account === "parent" && (!this.config.studentNumber || isNaN(this.config.studentNumber))) return this.sendSocketNotification('ERROR', "studentNumber ne peux pas être égale 0 !")
+    if (!this.config.cas) this.account.cas = "none"
+    this.account = {
+      username: this.config.username,
+      password: this.config.password,
+      url: this.config.url,
+      cas: this.config.cas,
+      account: this.config.account,
+      studentNumber: this.config.studentNumber
+    }
+    await this.pronote()
+    this.sendSocketNotification("INITIALIZED")
+    console.log("[PRONOTE] Avertissement: Ce système de configuration va devenir obselète.")
+    console.log("[PRONOTE] Avertissement: Merci d'utiliser Accounts: [] dans votre fichier de configuration")
+    console.log("[PRONOTE] Pronote is initialized.")
+  },
+
+  /** new configuration type **/
+  getAccount: async function() {
+    if (this.config.Account > this.config.Accounts.length) return this.sendSocketNotification('ERROR', "Numéro de compte inconnu ! (" + this.config.Account + ")")
+    this.account = this.config.Accounts[this.config.Account-1]
+    if (!this.account.username) return this.sendSocketNotification('ERROR', "Compte " + this.config.Account + ": Le champ user doit être remplis !")
+    if (!this.account.password) return this.sendSocketNotification('ERROR', "Compte " + this.config.Account + ": Le champ password doit être remplis !")
+    if (!this.account.url) return this.sendSocketNotification('ERROR', "Compte " + this.config.Account + ": Le champ url doit être remplis !")
+    if (this.account.account !== "student" && this.account.account !== "parent" ) return this.sendSocketNotification('ERROR', "Compte " + this.config.Account + ": Le champ account est incorrect (student ou parent)")
+    if (this.account.account === "parent" && (!this.account.studentNumber || isNaN(this.account.studentNumber))) return this.sendSocketNotification('ERROR', "Compte " + this.config.Account + ": studentNumber ne peux pas être égale 0 !")
+    if (!this.account.cas) this.account.cas = "none"
+    await this.pronote()
+    this.sendSocketNotification("INITIALIZED")
     console.log("[PRONOTE] Pronote is initialized.")
   },
 
   pronote: async function() {
     this.session= null
     this.session = await this.login()
-    if (this.config.PronoteKeepAlive && this.session) this.session.setKeepAlive(true)
+    this.session.setKeepAlive(true)
     await this.fetchData()
   },
 
@@ -49,23 +86,23 @@ module.exports = NodeHelper.create({
   login: async function() {
     try {
       log("Pronote Login.")
-      if (this.config.account == "student") {
+      if (this.account.account == "student") {
         return await pronote.login(
-          this.config.url,
-          this.config.username,
-          this.config.password,
-          this.config.cas
+          this.account.url,
+          this.account.username,
+          this.account.password,
+          this.account.cas
         )
       }
-      else if(this.config.account == "parent") {
+      else if(this.account.account == "parent") {
         return await pronote.loginParent(
-          this.config.url,
-          this.config.username,
-          this.config.password,
-          this.config.cas
+          this.account.url,
+          this.account.username,
+          this.account.password,
+          this.account.cas
         )
       }
-      else this.sendSocketNotification('ERROR', "Quel est votre type de compte ? student ou parent (account)")
+      else this.sendSocketNotification('ERROR', "Prevent login error !!!")
     } catch (err) {
       if (err.code === pronote.errors.WRONG_CREDENTIALS.code) {
         console.error("[PRONOTE] Error code: " + err.code + " - message: " + err.message)
@@ -91,8 +128,8 @@ module.exports = NodeHelper.create({
     if (!this.session) return console.log("[PRONOTE] Error... No session !")
 
     /** check student **/
-    if (this.config.account === "parent") {
-      this.student = this.config.studentNumber-1
+    if (this.account.account === "parent") {
+      this.student = this.account.studentNumber-1
       if(this.student > this.session.user.students.length -1) {
         log("Taratata... Tu as que " + this.session.user.students.length + " enfant(s)...")
         this.student = 0
@@ -102,17 +139,17 @@ module.exports = NodeHelper.create({
     /** fetch ONLY needed part from config **/
 
     if (this.config.Header.displayStudentName) {
-      this.data["name"] = this.config.account == "student" ? this.session.user.name : this.session.user.students[this.student].name
+      this.data["name"] = this.account.account == "student" ? this.session.user.name : this.session.user.students[this.student].name
       if (this.config.Header.displayStudentClass) {
-        this.data["class"] = this.config.account == "student" ? this.session.user.studentClass.name : this.session.user.students[this.student].studentClass.name
+        this.data["class"] = this.account.account == "student" ? this.session.user.studentClass.name : this.session.user.students[this.student].studentClass.name
       }
       if (this.config.Header.displayAvatar) {
-        this.data["avatar"] = this.config.account == "student" ? this.session.user.avatar : null //this.session.user.students[this.student].avatar
+        this.data["avatar"] = this.account.account == "student" ? this.session.user.avatar : this.session.user.students[this.student].avatar
       }
     }
 
     if (this.config.Header.displayEstablishmentName) {
-      this.data["establishment"] = this.config.account == "student" ? this.session.user.establishment.name : this.session.user.students[this.student].establishment.name
+      this.data["establishment"] = this.account.account == "student" ? this.session.user.establishment.name : this.session.user.students[this.student].establishment.name
     }
 
     var fromNow = new Date()
@@ -165,7 +202,7 @@ module.exports = NodeHelper.create({
 
     if (this.config.Timetables.displayActual) { //fetch table Of the day of school
       const to = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate(),18,0,0) // fin des cours a 18h
-      if (this.config.account === "student") {
+      if (this.account.account === "student") {
         const timetableOfTheDay = await this.session.timetable(from,to)
         this.data["timetableOfTheDay"] = timetableOfTheDay
       } else {
@@ -193,7 +230,7 @@ module.exports = NodeHelper.create({
       let ToNextDay =  new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,18,0,0)
       const NextDay = new Date(FromNextDay).toLocaleDateString(this.config.language, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
       var timetableOfNextDay = null
-      if (this.config.account == "student") timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay)
+      if (this.account.account == "student") timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay)
       else timetableOfNextDay = await this.session.timetable(this.session.user.students[this.student], FromNextDay,ToNextDay)
 
       this.data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
@@ -203,7 +240,7 @@ module.exports = NodeHelper.create({
     if (this.config.Averages.display || this.config.Marks.display) { // notes de l'eleve
       let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Marks.searchDays,0,0,0)
       var marks = null
-      if (this.config.account == "student") this.data["marks"] = await this.session.marks(from, toMarksSearch)
+      if (this.account.account == "student") this.data["marks"] = await this.session.marks(from, toMarksSearch)
       else this.data["marks"] = await this.session.marks(this.session.user.students[this.student], null, this.config.PeriodType)
 
       this.data.marks.subjects.filter(subject => {
@@ -218,7 +255,7 @@ module.exports = NodeHelper.create({
       if (this.data.isHolidays.active) fromThis = toIsHolidays // it's Holidays, so start since last day of it !
 
       let toHomeworksSearch = new Date(fromThis.getFullYear(),fromThis.getMonth(),fromThis.getDate() + this.config.Homeworks.searchDays,0,0,0)
-      if (this.config.account === "student") this.data["homeworks"] = await this.session.homeworks(from,toHomeworksSearch)
+      if (this.account.account === "student") this.data["homeworks"] = await this.session.homeworks(from,toHomeworksSearch)
       else this.data["homeworks"] = await this.session.homeworks(this.session.user.students[this.student], from,toHomeworksSearch)
 
       Array.from(this.data["homeworks"], (homework) => {
@@ -235,7 +272,7 @@ module.exports = NodeHelper.create({
       let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Absences.searchDays,0,0,0)
       //use my new feature (search by trimester // semester)
       var absencesValue = null
-      if (this.config.account === "student") absencesValue = await this.session.absences(null , null, null, this.config.PeriodType)
+      if (this.account.account === "student") absencesValue = await this.session.absences(null , null, null, this.config.PeriodType)
       else absencesValue = await this.session.absences(this.session.user.students[this.student], null , null, null, this.config.PeriodType)
 
       this.data["absences"] = absencesValue["absences"]
@@ -302,35 +339,35 @@ module.exports = NodeHelper.create({
         this.initialize(payload)
         break
       case 'SET_ACCOUNT':
-        this.switchAccount(payload)
+        if (this.config.account > 0) this.switchAccount(payload)
         break
     }
   },
 
   /** update process **/
   scheduleUpdate: function(delay) {
-    if (!this.config.PronoteKeepAlive) {
+    this.timeLogout = setTimeout(() => {
       this.session.logout()
       log("Pronote Logout.")
-    }
+    }, 3000)
+
     let nextLoad = this.updateIntervalMilliseconds
     if (typeof delay !== "undefined" && delay >= 0) {
       nextLoad = delay
     }
     clearInterval(this.interval)
     this.interval = setInterval(async () => {
-      if (this.config.PronoteKeepAlive) await this.fetchData()
-      else await this.pronote()
+      await this.pronote()
       log("Pronote data updated.")
     }, nextLoad)
   },
 
-  /** swith account... Parent only **/
+  /** swith account...**/
   switchAccount: async function (accountNumber) {
+    clearTimeout(this.timeLogout)
     clearInterval(this.interval)
-    this.config.studentNumber = accountNumber
-    if (this.config.PronoteKeepAlive) await this.fetchData()
-    else await this.pronote()
+    this.config.account = accountNumber
+    this.getAccount()
   },
 
   /** ***** **/
