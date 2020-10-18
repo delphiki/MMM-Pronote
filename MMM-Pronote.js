@@ -147,6 +147,7 @@ Module.register("MMM-Pronote", {
         if (!isNaN(payload)) {
           this.sendSocketNotification("SET_ACCOUNT", payload)
         }
+        else console.error("[PRONOTE] Account not a number", payload)
         break
     }
   },

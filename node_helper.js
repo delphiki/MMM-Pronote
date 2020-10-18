@@ -339,7 +339,7 @@ module.exports = NodeHelper.create({
         this.initialize(payload)
         break
       case 'SET_ACCOUNT':
-        if (this.config.account > 0) this.switchAccount(payload)
+        if (this.config.Account > 0) this.switchAccount(payload)
         break
     }
   },
@@ -364,9 +364,10 @@ module.exports = NodeHelper.create({
 
   /** swith account...**/
   switchAccount: async function (accountNumber) {
+    log("Switch Account:", accountNumber)
     clearTimeout(this.timeLogout)
     clearInterval(this.interval)
-    this.config.account = accountNumber
+    this.config.Account = accountNumber
     this.getAccount()
   },
 
