@@ -1,11 +1,11 @@
 /**  MMM-Pronote addon  **/
-/**  permet de changer de compte  si vous avez plusieures enfants **/
+/**  permet de changer de compte si vous avez plusieures enfants **/
 /**  @bugsounet  **/
 
 var recipe = {
   transcriptionHooks: {
     "PRONOTE_ACCOUNT": {
-      pattern: "pronotes enfant (.*)",
+      pattern: "pronote (.*)",
       command: "PRONOTE_ACCOUNT"
     },
   },
