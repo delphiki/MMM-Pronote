@@ -381,6 +381,7 @@ module.exports = NodeHelper.create({
     clearInterval(this.interval)
     this.sendSocketNotification("ACCOUNT_CHANGE")
     this.config.Account = accountNumber
+    this.init = false
     this.getAccount()
   },
 
