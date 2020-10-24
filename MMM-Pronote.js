@@ -10,35 +10,26 @@ Module.register("MMM-Pronote", {
 
   requiresVersion: "2.13.0",
   defaults: {
-    debug: true, // set it to false if you want no debug in console
-    Account: 0,
+    debug: false, // set it to false if you want no debug in console
+    Account: 1,
     Accounts: [
       {
         url: null,
         username: null,
         password: null,
         cas: 'none',
-        account: 'student',
+        account: 'parent',
         studentNumber: 1, // only for parent account
       }
     ],
-
-    /** it will be deprecied soon **/
-    url: null,
-    username: null,
-    password: null,
-    cas: 'none',
-    account: 'student',
-    studentNumber: 1,
-    /**********/
-
+    rotateAccount: true,
     updateInterval: "10m",
     PeriodType: "semester",
     Header: {
       displayEstablishmentName: true,
       displayStudentName: true,
       displayStudentClass: true,
-      displayAvatar: true // ne fonctionne pas avec le compte parent et uniquement avec PronoteKeepAlive sur true
+      displayAvatar: true
     },
     Timetables: {
       displayActual: true,
