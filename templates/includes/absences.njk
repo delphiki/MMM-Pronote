@@ -7,7 +7,11 @@
           {% if count < config.Absences.number %}
               <div class="PRONOTE_DETAIL">
                   <div class="PRONOTE_HOURS">
-                      Du {{ absences.localizedFrom }} au {{ absences.localizedTo }}
+                      {% if absences.oneDay %}
+                        Le {{ absences.day }} de {{ absences.fromHour }} à {{ absences.toHour }}
+                      {% else %}
+                        Du {{ absences.localizedFrom }} au {{ absences.localizedTo }}
+                      {% endif %}
                   </div>
                   <div class="PRONOTE_VALUES">
                     {% if absences.justified %}
