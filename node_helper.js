@@ -162,12 +162,8 @@ module.exports = NodeHelper.create({
     this.data.isHolidays.name = nameIsHolidays
 
     if (this.config.debug && fromIsHolidays && toIsHolidays ) {
-      this.data.isHolidays.formatFrom = fromIsHolidays.toLocaleDateString(this.config.language,
-        { weekday: "long", day: 'numeric', month: "long", year: "numeric", hour: '2-digit', minute:'2-digit'}
-      )
-      this.data.isHolidays.formatTo = toIsHolidays.toLocaleDateString(this.config.language,
-        { weekday: "long", day: 'numeric', month: "long", year: "numeric", hour: '2-digit', minute:'2-digit'}
-      )
+      this.data.isHolidays.formatFrom = this.formatDate(fromIsHolidays, true, { weekday: "long", day: 'numeric', month: "long", year: "numeric", hour: '2-digit', minute:'2-digit'})
+      this.data.isHolidays.formatTo = this.formatDate(toIsHolidays, true, { weekday: "long", day: 'numeric', month: "long", year: "numeric", hour: '2-digit', minute:'2-digit'})
     }
 
     /** Display Holidays **/
@@ -195,8 +191,8 @@ module.exports = NodeHelper.create({
       this.localizedDate(this.data.timetableOfTheDay, {hour: '2-digit', minute:'2-digit'})
       /** don't display if it's not today **/
       if (this.data.timetableOfTheDay.length > 0) {
-        let wanted = this.data.timetableOfTheDay[0].to.toLocaleDateString(this.config.language, { day: 'numeric' })
-        let now = new Date().toLocaleDateString(this.config.language, { day: 'numeric' })
+        let wanted = this.formatDate(this.data.timetableOfTheDay[0].to, true, { day: 'numeric' })
+        let now = this.formatDate(new Date(), true, { day: 'numeric' })
         if (wanted != now) this.data["timetableOfTheDay"] = []
       }
     }
@@ -209,7 +205,7 @@ module.exports = NodeHelper.create({
       if (day == 6) next = 2
       let FromNextDay = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,0,0,0)
       let ToNextDay =  new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate()+next,18,0,0)
-      const NextDay = new Date(FromNextDay).toLocaleDateString(this.config.language, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
+      const NextDay = this.formatDate(FromNextDay, true, { weekday: "long", day: 'numeric', month: "long", year: "numeric" })
       var timetableOfNextDay = null
       if (this.account.account == "student") timetableOfNextDay = await this.session.timetable(FromNextDay,ToNextDay)
       else timetableOfNextDay = await this.session.timetable(this.session.user.students[this.student], FromNextDay,ToNextDay)
@@ -221,7 +217,7 @@ module.exports = NodeHelper.create({
     if (this.config.Averages.display || this.config.Marks.display) { // notes de l'eleve
       let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Marks.searchDays,0,0,0)
       if (this.data.isHolidays.active) { // holidays -> lock start from the first day of holiday
-        toMarksSearch = new Date(toIsHolidays.getFullYear(),fromIsHolidays.getMonth(),fromIsHolidays.getDate() - this.config.Marks.searchDays,0,0,0)
+        toMarksSearch = new Date(fromIsHolidays.getFullYear(),fromIsHolidays.getMonth(),fromIsHolidays.getDate() - this.config.Marks.searchDays,0,0,0)
       }
       var marks = null
       if (this.account.account == "student") this.data["marks"] = await this.session.marks(from, toMarksSearch)
@@ -243,7 +239,7 @@ module.exports = NodeHelper.create({
       else this.data["homeworks"] = await this.session.homeworks(this.session.user.students[this.student], from,toHomeworksSearch)
 
       Array.from(this.data["homeworks"], (homework) => {
-        homework.formattedFor = (new Date(homework.for)).toLocaleDateString(this.config.language, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
+        homework.formattedFor = this.formatDate(homework.for, true, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
       })
 
       /** display only number of day needed **/
@@ -254,6 +250,9 @@ module.exports = NodeHelper.create({
 
     if (this.config.Absences.display || this.config.Delays.display) {
       let toAbsencesSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Absences.searchDays,0,0,0)
+      if (this.data.isHolidays.active) {
+        toAbsencesSearch = new Date(fromIsHolidays.getFullYear(),fromIsHolidays.getMonth(),fromIsHolidays.getDate() - this.config.Absences.searchDays,0,0,0)
+      }
       //use my new feature (search by trimester // semester)
       var absencesValue = null
       if (this.account.account === "student") absencesValue = await this.session.absences(null , null, null, this.config.PeriodType)
@@ -261,12 +260,26 @@ module.exports = NodeHelper.create({
 
       this.data["absences"] = absencesValue["absences"]
       this.localizedDate(this.data["absences"], {month: "numeric", day: "numeric", hour: '2-digit', minute:'2-digit'})
+      Array.from(this.data.absences, absence => {
+        absence.oneDay= false
+        let dateFrom = new Date(absence.from.getFullYear(),absence.from.getMonth(),absence.from.getDate(),0,0,0)
+        let dateTo = new Date(absence.to.getFullYear(),absence.to.getMonth(),absence.to.getDate(),0,0,0)
+        if (dateFrom.getTime() == dateTo.getTime()) {
+          absence.oneDay = true
+          absence.day = this.formatDate(absence.from, true, { day: 'numeric', month: 'short'})
+          absence.fromHour = this.formatTime(absence.from, true)
+          absence.toHour = this.formatTime(absence.to, true)
+        }
+      })
       this.data.absences = this.data.absences.filter(absences => absences.from > toAbsencesSearch).reverse()
 
       this.data["delays"] = absencesValue["delays"]
       let toDelaySearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Delays.searchDays,0,0,0)
+      if (this.data.isHolidays.active) {
+        toDelaySearch = new Date(fromIsHolidays.getFullYear(),fromIsHolidays.getMonth(),fromIsHolidays.getDate() - this.config.Delays.searchDays,0,0,0)
+      }
       Array.from(this.data["delays"], (course) => {
-        course.localizedDate = (new Date(course.date)).toLocaleTimeString(this.config.language, {month: "short", day: "numeric", hour: '2-digit', minute:'2-digit'})
+        course.localizedDate = this.formatTime(course.date, true, {month: "short", day: "numeric", hour: '2-digit', minute:'2-digit'})
       })
       this.data.delays = this.data.delays.filter(delays => delays.date > toDelaySearch).reverse()
     }
@@ -299,22 +312,21 @@ module.exports = NodeHelper.create({
 
   localizedDate: function(array, options= {}) {
     Array.from(array, (course) => {
-        course.localizedFrom = (new Date(course.from)).toLocaleTimeString(this.config.language, options)
-        course.localizedTo = (new Date(course.to)).toLocaleTimeString(this.config.language, options)
+        course.localizedFrom = this.formatTime(course.from, true, options)
+        course.localizedTo = this.formatTime(course.to, true, options)
     })
   },
 
-  formatDate: function(date, min = false) {
-    if (!date) {
-      return '';
-    }
-    let options = { day: 'numeric', month: 'numeric' }
-
-    if (!min) {
-      options = {};
-    }
-
+  formatDate: function(date, min = false, options = { day: 'numeric', month: 'numeric'} ) {
+    if (!date) return ''
+    if (!min) options = {}
     return (new Date(date)).toLocaleDateString(this.config.language, options)
+  },
+
+  formatTime: function(date, min = false, options = {hour: '2-digit', minute:'2-digit'} ) {
+    if (!date) return ''
+    if (!min) options = {}
+    return (new Date(date)).toLocaleTimeString(this.config.language, options)
   },
 
   socketNotificationReceived: function(notification, payload) {
