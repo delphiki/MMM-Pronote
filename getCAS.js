@@ -5,7 +5,7 @@ var config = {
   latitude: 50.173057556152344,
   longitude: 4.095112323760986,
   codePostal: 59740,
-  url: null // "https://0590206D.index-education.net/pronote"
+  url: null // example de format: "https://0590206D.index-education.net/pronote"
 }
 
 /** 
@@ -27,6 +27,7 @@ async function display() {
 
 async function listURL() {
   var list = await pronote.geo(config.latitude,config.longitude)
+  if (!list.length) return console.log("Erreur: Vérifier latitude et longitude.")
   var count = 0
   var lastURL = null
   console.log("Liste URL:\n")
