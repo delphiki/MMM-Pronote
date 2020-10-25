@@ -194,7 +194,7 @@ module.exports = NodeHelper.create({
     }
 
     /** Display Holidays **/
-    if (this.config.Holidays.display) { // Holidays ! maybe needed for other check
+    if (this.config.Holidays.display) {
       this.data["holidays"] = this.session.params.publicHolidays
       this.data.holidays = this.data.holidays.filter(Holidays => fromNow < Holidays.to)
 
@@ -243,6 +243,9 @@ module.exports = NodeHelper.create({
 
     if (this.config.Averages.display || this.config.Marks.display) { // notes de l'eleve
       let toMarksSearch = new Date(fromNow.getFullYear(),fromNow.getMonth(),fromNow.getDate() - this.config.Marks.searchDays,0,0,0)
+      if (this.data.isHolidays.active) { // holidays -> lock start from the first day of holiday
+        toMarksSearch = new Date(toIsHolidays.getFullYear(),fromIsHolidays.getMonth(),fromIsHolidays.getDate() - this.config.Marks.searchDays,0,0,0)
+      }
       var marks = null
       if (this.account.account == "student") this.data["marks"] = await this.session.marks(from, toMarksSearch)
       else this.data["marks"] = await this.session.marks(this.session.user.students[this.student], null, this.config.PeriodType)
