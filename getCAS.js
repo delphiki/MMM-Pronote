@@ -20,7 +20,7 @@ var config = {
 
 const pronote = require('@bugsounet/pronote-api');
 
-async function display() {
+function display() {
   if (!config.url) listURL()
   else getCAS(config.url)
 }
