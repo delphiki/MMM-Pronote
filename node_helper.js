@@ -35,30 +35,7 @@ module.exports = NodeHelper.create({
     console.log("[PRONOTE] Number of CAS available:", pronote.casList.length)
     log("CAS List:", pronote.casList)
     if (this.config.Account > 0) this.getAccount()
-    else this.simpleAccount()
-  },
-
-  /** old configuration type **/
-  simpleAccount: async function() {
-    if (!this.config.username) return this.sendSocketNotification('ERROR', "Le champ user doit être remplis !")
-    if (!this.config.password) return this.sendSocketNotification('ERROR', "Le champ password doit être remplis !")
-    if (!this.config.url) return this.sendSocketNotification('ERROR', "Le champ url doit être remplis !")
-    if (this.config.account !== "student" && this.config.account !== "parent" ) return this.sendSocketNotification('ERROR', "Le champ account est incorrect (student ou parent)")
-    if (this.config.account === "parent" && (!this.config.studentNumber || isNaN(this.config.studentNumber))) return this.sendSocketNotification('ERROR', "studentNumber ne peux pas être égale 0 !")
-    if (!this.config.cas) this.account.cas = "none"
-    this.account = {
-      username: this.config.username,
-      password: this.config.password,
-      url: this.config.url,
-      cas: this.config.cas,
-      account: this.config.account,
-      studentNumber: this.config.studentNumber
-    }
-    await this.pronote()
-    this.sendSocketNotification("INITIALIZED")
-    console.log("[PRONOTE] Avertissement: Ce système de configuration va devenir obselète.")
-    console.log("[PRONOTE] Avertissement: Merci d'utiliser Accounts: [] dans votre fichier de configuration")
-    console.log("[PRONOTE] Pronote is initialized.")
+    else this.sendSocketNotification('ERROR', "Account: ne peut pas être égal à 0 !")
   },
 
   /** new configuration type **/
