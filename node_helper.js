@@ -24,7 +24,6 @@ module.exports = NodeHelper.create({
   initialize: function(config) {
     console.log("[PRONOTE] MMM-Pronote Version:", require('./package.json').version)
     this.config = config
-    this.accountNumber = this.config.Account
     if (this.config.debug) log = (...args) => { console.log("[PRONOTE]", ...args) }
     this.updateIntervalMilliseconds = this.getUpdateIntervalMillisecondFromString(this.config.updateInterval)
     this.displayIntervalMilliseconds = this.getUpdateIntervalMillisecondFromString(this.config.rotateInterval)
@@ -40,13 +39,13 @@ module.exports = NodeHelper.create({
     }
     console.log("[PRONOTE] Number of CAS available:", pronote.casList.length)
     log("CAS List:", pronote.casList)
-    if (this.config.Account > 0) this.getAccount()
+    if (this.config.defaultAccount > 0) this.getAccount()
     else this.sendSocketNotification('ERROR', "Account: ne peut pas être égal à 0 !")
   },
 
   /** new configuration type **/
   getAccount: async function() {
-    if (this.config.Account > this.config.Accounts.length) return this.sendSocketNotification('ERROR', "Numéro de compte inconnu ! (" + this.config.Account + ")")
+    if (this.config.defaultAccount > this.config.Accounts.length) return this.sendSocketNotification('ERROR', "Numéro de compte inconnu ! (" + this.config.defaultAccount + ")")
     this.account = this.config.Accounts[this.accountNumber-1]
     if (!this.account.username) return this.sendSocketNotification('ERROR', "Compte " + this.accountNumber + ": Le champ user doit être remplis !")
     if (!this.account.password) return this.sendSocketNotification('ERROR', "Compte " + this.accountNumber + ": Le champ password doit être remplis !")
@@ -57,7 +56,7 @@ module.exports = NodeHelper.create({
     await this.pronote()
     /** fetch all account on start (loop) **/
     if (!this.init) {
-      if (this.accountNumber == this.config.Account) {
+      if (this.accountNumber == this.config.defaultAccount) {
         this.sendSocketNotification("INITIALIZED")
         this.currentDisplay = this.accountNumber
         if (this.config.rotateAccount && this.config.Accounts.length > 1 ) this.scheduleDisplay()
@@ -65,7 +64,7 @@ module.exports = NodeHelper.create({
       }
       if (this.accountNumber+1 > this.config.Accounts.length) {
         console.log("[PRONOTE] Pronote is initialized.")
-        this.accountNumber = this.config.Account
+        this.accountNumber = this.config.defaultAccount
         this.init=true
         /** Ok ! All info is in cache now auto-update it ! **/
         this.scheduleUpdate()
@@ -81,10 +80,10 @@ module.exports = NodeHelper.create({
     if (!first) this.accountNumber = 1
     this.account = this.config.Accounts[this.accountNumber-1]
     await this.pronote()
-    if (!this.config.rotateAccount && this.config.Account == this.accountNumber) this.sendUpdated(this.cache[this.config.Account])
+    if (!this.config.rotateAccount && this.config.defaultAccount == this.accountNumber) this.sendUpdated(this.cache[this.config.defaultAccount])
     if (this.accountNumber+1 > this.config.Accounts.length) {
       log("Fetch Datas Done.")
-      this.accountNumber = this.config.Account
+      this.accountNumber = this.config.defaultAccount
     } else {
       this.accountNumber += 1
       log("Make Cache: set account to", this.accountNumber)
@@ -443,7 +442,7 @@ module.exports = NodeHelper.create({
   /** swith account...**/
   switchAccount: async function (accountNumber) {
     log("Switch Account:", accountNumber)
-    this.config.Account = accountNumber
+    this.config.defaultAccount = accountNumber
     this.currentDisplay = accountNumber
     if (this.config.rotateAccount) this.scheduleDisplay()
     else this.sendUpdated(this.cache[this.currentDisplay])

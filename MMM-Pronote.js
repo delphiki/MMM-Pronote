@@ -11,7 +11,7 @@ Module.register("MMM-Pronote", {
   requiresVersion: "2.13.0",
   defaults: {
     debug: false, // set it to false if you want no debug in console
-    Account: 1,
+    defaultAccount: 1,
     Accounts: [
       {
         url: null,
