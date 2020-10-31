@@ -43,7 +43,7 @@ async function listURL() {
   })
   if (!count) console.log("Aucune URL trouvé")
   else if (count == 1) getCAS(lastURL)
-  else console.log("\nMerci de reporter `url` correspondant à votre établissement dans votre configuration\net relancer le programme pour connaitre le `cas`")
+  else console.log("\nMerci de valider `url` correspondant à votre établissement dans votre configuration\net relancer le programme pour connaitre le `cas`")
   return
 }
   

@@ -23,7 +23,8 @@ Module.register("MMM-Pronote", {
       }
     ],
     rotateAccount: true,
-    updateInterval: "10m",
+    rotateInterval: "1m",
+    updateInterval: "15m",
     PeriodType: "semester",
     Header: {
       displayEstablishmentName: true,
@@ -165,12 +166,6 @@ Module.register("MMM-Pronote", {
         this.init = true
         this.userData = {}
         this.error = payload
-        this.updateDom()
-        break
-      case "ACCOUNT_CHANGE":
-        this.userData = {}
-        this.error = null
-        this.init = false
         this.updateDom()
         break
       case "NPM_UPDATE":
