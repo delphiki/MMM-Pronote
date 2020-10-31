@@ -94,8 +94,10 @@ module.exports = NodeHelper.create({
   pronote: async function() {
     this.session[this.accountNumber] = null
     this.session[this.accountNumber] = await this.login()
-    this.session[this.accountNumber].setKeepAlive(true)
-    await this.fetchData()
+    if (this.session[this.accountNumber]) {
+      this.session[this.accountNumber].setKeepAlive(true)
+      await this.fetchData()
+    }
   },
 
   /** Login to Pronote **/
@@ -121,8 +123,8 @@ module.exports = NodeHelper.create({
       else this.sendSocketNotification('ERROR', "Prevent login error !!!")
     } catch (err) {
       if (err.code === pronote.errors.WRONG_CREDENTIALS.code) {
-        console.error("[PRONOTE] Error code: " + err.code + " - message: " + err.message)
-        this.sendSocketNotification('ERROR', "Mauvais identifiants")
+        console.error("[PRONOTE] Error Account " + this.accountNumber + " - code: " + err.code + " - message: " + err.message)
+        this.sendSocketNotification('ERROR', "Mauvais identifiants Account " + this.accountNumber)
       } else {
         if (err.code) {
           console.error("[PRONOTE] Error code: " + err.code + " - message: " + err.message)
@@ -132,7 +134,7 @@ module.exports = NodeHelper.create({
           /** erreur du code merdique de Pronote-api ? **/
           console.error("[PRONOTE] API Error", err)
           this.sendSocketNotification('ERROR', "MMM-Pronote crash !")
-          setTimeout(async () => { await this.pronote() } , 3000)
+          //setTimeout(async () => { await this.pronote() } , 3000) // !! not sure really needed !!
         }
       }
     }
