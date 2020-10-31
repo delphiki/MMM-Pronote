@@ -83,7 +83,7 @@ module.exports = NodeHelper.create({
     await this.pronote()
     if (!this.config.rotateAccount && this.config.Account == this.accountNumber) this.sendUpdated(this.cache[this.config.Account])
     if (this.accountNumber+1 > this.config.Accounts.length) {
-      log("[PRONOTE] Fetch Datas Done.")
+      log("Fetch Datas Done.")
       this.accountNumber = this.config.Account
     } else {
       this.accountNumber += 1
