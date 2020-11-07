@@ -20,6 +20,11 @@
                       Absence non justifiée
                     {% endif %}
                   </div>
+                  {% if absences.justified %}
+                    <div class="PRONOTE_ABSENCES_DONE">✓</div>
+                  {%else %}
+                    <div class="PRONOTE_ABSENCES_NOTDONE">⁉️</div>
+                  {% endif %}
               </div>
           {% endif %}
           {% set count = count + 1 %}
