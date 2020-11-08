@@ -285,7 +285,7 @@ module.exports = NodeHelper.create({
       else data["homeworks"] = await this.session[this.accountNumber].homeworks(this.session[this.accountNumber].user.students[this.student], from,toHomeworksSearch)
 
       Array.from(data["homeworks"], (homework) => {
-        homework.formattedFor = this.formatDate(homework.for, true, {weekday: "short", year: "numeric", month: "short", day: "numeric"})
+        homework.formattedFor = this.formatDate(homework.for, true, {weekday: "long", year: "numeric", month: "long", day: "numeric"})
       })
 
       /** display only number of day needed **/
