@@ -12,7 +12,12 @@
                 <div class="PRONOTE_DETAIL">
                     <div class="PRONOTE_HOURS">{{ mark.formattedDate }}</div>
                     <div class="PRONOTE_VALUES">{{ mark.title }}</div>
-                    <div class="PRONOTE_VALUES highlight">{% if not mark.isAway %}{{ mark.value }}/{{ mark.scale }}{% else %}Absent{% endif %}</div>
+                    {% if mark.isAway %}<div class="PRONOTE_VALUES highlight">Absent</div>
+                    {% else %}
+                      {% if (mark.value/mark.scale) >= 0.5 %} <div class="PRONOTE_VALUES highlight{% if config.Marks.colored %} green{% endif %}">{{ mark.value }}/{{ mark.scale }}</div>
+                      {% else %} <div class="PRONOTE_VALUES highlight{% if config.Marks.colored %} red{% endif %}">{{ mark.value }}/{{ mark.scale }}</div>
+                      {% endif %}
+                    {% endif %}
                     {% if config.Marks.displayCoeff %}
                         <div class="PRONOTE_VALUES">
                             Coeff : {{ mark.coefficient }}

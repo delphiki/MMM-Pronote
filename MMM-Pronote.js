@@ -47,7 +47,8 @@ Module.register("MMM-Pronote", {
       display: true,
       searchDays: 7,
       displayAverage: true,
-      displayCoeff: true
+      displayCoeff: true,
+      colored: true
     },
     Homeworks: {
       display: true,
