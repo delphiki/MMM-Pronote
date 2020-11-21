@@ -90,6 +90,14 @@
   margin-right: 10px;
 }
 
+.PRONOTE_VALUES.green {
+  color: green;
+}
+
+.PRONOTE_VALUES.red {
+  color:red;
+}
+
 #PRONOTE_TEXT_SIMPLE {
   padding-bottom: 10px;
 }

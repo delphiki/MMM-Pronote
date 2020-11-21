@@ -47,14 +47,16 @@ Module.register("MMM-Pronote", {
       display: true,
       searchDays: 7,
       displayAverage: true,
-      displayCoeff: true
+      displayCoeff: true,
+      colored: true
     },
     Homeworks: {
       display: true,
       searchDays: 7,
       numberDays: 1,
       displayDescription: true,
-      displayDone: true
+      displayDone: true,
+      lengthDescription: 150
     },
     Absences: {
       display: true,
@@ -70,6 +72,7 @@ Module.register("MMM-Pronote", {
       display: true,
       number: 3
     },
+    ReplaceSubjects: [],
     NPMCheck: {
       useChecker: true,
       delay: "45m",

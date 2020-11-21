@@ -239,6 +239,13 @@ module.exports = NodeHelper.create({
         let wanted = this.formatDate(data.timetableOfTheDay[0].to, true, { day: 'numeric' })
         let now = this.formatDate(new Date(), true, { day: 'numeric' })
         if (wanted != now) data["timetableOfTheDay"] = []
+
+        /** replace subjects from config **/
+        Array.from(data["timetableOfTheDay"], (timetable) => {
+          Array.from(this.config.ReplaceSubjects, (subject) => {
+            if (subject[timetable.subject]) timetable.subject = subject[timetable.subject]
+          })
+        })
       }
     }
 
@@ -255,6 +262,13 @@ module.exports = NodeHelper.create({
       var timetableOfNextDay = null
       if (this.account.account == "student") timetableOfNextDay = await this.session[this.accountNumber].timetable(FromNextDay,ToNextDay)
       else timetableOfNextDay = await this.session[this.accountNumber].timetable(this.session[this.accountNumber].user.students[this.student], FromNextDay,ToNextDay)
+
+      /** replace subjects from config **/
+      Array.from(timetableOfNextDay, (timetable) => {
+        Array.from(this.config.ReplaceSubjects, (subject) => {
+          if (subject[timetable.subject]) timetable.subject = subject[timetable.subject]
+        })
+      })
 
       data["timetableOfNextDay"] = { timetable: timetableOfNextDay, timetableDay: NextDay }
       this.localizedDate(data.timetableOfNextDay.timetable, {hour: '2-digit', minute:'2-digit'})
@@ -274,6 +288,12 @@ module.exports = NodeHelper.create({
       })
 
       data.marks.subjects = data.marks.subjects.filter(subject => subject.marks.length > 0)
+      /** replace subjects from config **/
+      Array.from(data.marks.subjects, (subject) => {
+        Array.from(this.config.ReplaceSubjects, (replace) => {
+          if (replace[subject.name]) subject.name = replace[subject.name]
+        })
+      })
     }
 
     if (this.config.Homeworks.display) { // liste des devoirs à faire
@@ -283,9 +303,14 @@ module.exports = NodeHelper.create({
       let toHomeworksSearch = new Date(fromThis.getFullYear(),fromThis.getMonth(),fromThis.getDate() + this.config.Homeworks.searchDays,0,0,0)
       if (this.account.account === "student") data["homeworks"] = await this.session[this.accountNumber].homeworks(from,toHomeworksSearch)
       else data["homeworks"] = await this.session[this.accountNumber].homeworks(this.session[this.accountNumber].user.students[this.student], from,toHomeworksSearch)
-
       Array.from(data["homeworks"], (homework) => {
         homework.formattedFor = this.formatDate(homework.for, true, {weekday: "long", year: "numeric", month: "long", day: "numeric"})
+        /** wouahh ... description is too long ?? **/
+        if (homework.description.length > this.config.Homeworks.lengthDescription) homework.description = homework.description.slice (0,this.config.Homeworks.lengthDescription-3) + "..."
+        /** replace subjects from config **/
+        Array.from(this.config.ReplaceSubjects, (subject) => {
+          if (subject[homework.subject]) homework.subject = subject[homework.subject]
+        })
       })
 
       /** display only number of day needed **/
